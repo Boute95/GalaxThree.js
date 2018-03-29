@@ -1,0 +1,76 @@
+<!-- This file is part of GalaxThree.js which is released under GPL v3. -->
+
+
+
+<!DOCTYPE html>
+<html>
+
+    
+    <head>
+	<meta charset=utf-8>
+	<title>My first three.js app</title>
+	<style>
+	 body { margin: 0; overflow: hidden}
+	 canvas { width: 100%; height: 100% }
+	</style>
+    </head>
+
+    
+    <body>
+	
+	<canvas id="myCanvas"></canvas>
+	
+	<script src="js/three.min.js"></script>
+	<script src="js/OrbitControls.js"></script>
+	<script src="js/Galax3.js"></script>
+	
+	<script>
+
+	 //////////////////////////////
+	 // We suppose 1 unit = 1 km //
+	 //////////////////////////////
+
+	 // Variables
+	 const radiusUniverse = 100; //< In light years.
+	 
+	 
+	 // Renderer
+	 var myCanvas = document.getElementById("myCanvas"); 
+	 var renderer = new THREE.WebGLRenderer(
+	     {canvas : myCanvas, antialias: true, logarithmicDepthBuffer: true});
+	 renderer.setClearColor(0x222222);
+	 renderer.setPixelRatio(window.devicePixelRatio);
+	 renderer.setSize(window.innerWidth, window.innerHeight);
+	 
+	 // Camera
+	 var camera = new THREE.PerspectiveCamera(
+	     60, window.innerWidth / window.innerHeight, 10, 1e12);
+	 camera.position.z = 0;
+
+	 // Controls
+	 var controls = new THREE.OrbitControls(camera, myCanvas);
+	 controls.enableDamping = true;
+	 controls.minDistance = 10;
+	 controls.maxDistance = 100;	 
+	 
+	 // Scene
+	 var scene = new THREE.Scene();
+
+	 // Universe
+	 var universe = new Universe(scene, radiusUniverse);
+	 camera.far = universe.radiusInKm;
+
+	 for (let star of universe.arrayStars) {
+	     scene.add(star.mesh);
+	 }
+	 
+	 // Render loop
+	 render();
+	 function render() {
+	     renderer.render(scene, camera);
+	     requestAnimationFrame(render);
+	 }
+	 
+	</script>
+    </body>
+</html>
