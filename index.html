@@ -44,7 +44,7 @@
 	 
 	 // Camera
 	 var camera = new THREE.PerspectiveCamera(
-	     60, window.innerWidth / window.innerHeight, 1, 1e14);
+	     50, myCanvas.width / myCanvas.height);
 	 camera.position.z = 0;
 
 	 // Controls
@@ -59,6 +59,8 @@
 	 // Universe
 	 var universe = new Universe(scene, radiusUniverseInLy);
 	 camera.far = universe.radiusInKm;
+	 camera.updateProjectionMatrix();
+	 console.log(camera.far);
 
 	 // Render loop
 	 render();

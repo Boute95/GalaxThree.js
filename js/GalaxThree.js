@@ -74,7 +74,8 @@ function Universe (scene,
     // Generate stars and position them randomly
     for (let category of arrayStarCategories) {
     	let nbOfStarsCategory = Math.round(category.proba * numberOfStars);
-	console.log(nbOfStarsCategory + " stars for the first category");
+	console.log(nbOfStarsCategory + " stars for the category " +
+		    category["spectralType"]);
     	for (let i=0 ; i < nbOfStarsCategory ; ++i) {
     	    var star = new Star(
 		category.spectralType,
@@ -102,7 +103,7 @@ function Star (color, radius, luminosity, position) {
 
     // Characteristics
     this.color = color;
-    this.radius = radius * solRadius;
+    this.radius = radius * solRadius * 2;
     this.luminosity = luminosity;
 
     // Generate the mesh
