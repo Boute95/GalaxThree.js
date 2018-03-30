@@ -22,7 +22,7 @@
 	
 	<script src="js/three.min.js"></script>
 	<script src="js/OrbitControls.js"></script>
-	<script src="js/Galax3.js"></script>
+	<script src="js/GalaxThree.js"></script>
 	
 	<script>
 
@@ -31,7 +31,7 @@
 	 //////////////////////////////
 
 	 // Variables
-	 const radiusUniverse = 100; //< In light years.
+	 const radiusUniverseInLy = 100; //< In light years.
 	 
 	 
 	 // Renderer
@@ -44,7 +44,7 @@
 	 
 	 // Camera
 	 var camera = new THREE.PerspectiveCamera(
-	     60, window.innerWidth / window.innerHeight, 10, 1e12);
+	     60, window.innerWidth / window.innerHeight, 1, 1e14);
 	 camera.position.z = 0;
 
 	 // Controls
@@ -57,13 +57,9 @@
 	 var scene = new THREE.Scene();
 
 	 // Universe
-	 var universe = new Universe(scene, radiusUniverse);
+	 var universe = new Universe(scene, radiusUniverseInLy);
 	 camera.far = universe.radiusInKm;
 
-	 for (let star of universe.arrayStars) {
-	     scene.add(star.mesh);
-	 }
-	 
 	 // Render loop
 	 render();
 	 function render() {

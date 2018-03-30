@@ -73,18 +73,22 @@ function Universe (scene,
 
     // Generate stars and position them randomly
     for (let category of arrayStarCategories) {
-	let nbOfStarsCategory = Math.round(category.proba * numberOfStars);
-	for (let i=0 ; i < nbOfStarsCategory ; ++i) {
-	    var star = new Star(category.spectralType,
-				category.radius,
-				category.luminosity,
-				new THREE.Vector3(Math.random * this.radiusInKm,
-						  Math.random * this.radiusInKm,
-						  Math.random * this.radiusInKm));
-	    this.arrayStars.push(star);
-	}
+    	let nbOfStarsCategory = Math.round(category.proba * numberOfStars);
+	console.log(nbOfStarsCategory + " stars for the first category");
+    	for (let i=0 ; i < nbOfStarsCategory ; ++i) {
+    	    var star = new Star(
+		category.spectralType,
+    		category.radius,
+    		category.luminosity,
+    		new THREE.Vector3(
+		    Math.random() * 2 * this.radiusInKm - this.radiusInKm,
+    		    Math.random() * 2 * this.radiusInKm - this.radiusInKm,
+    		    Math.random() * 2 * this.radiusInKm - this.radiusInKm));
+    	    this.arrayStars.push(star);
+	    scene.add(star.mesh);
+    	}
     } // end for (category of arraystarcategories)
-    
+   
 }
 
 
@@ -98,14 +102,15 @@ function Star (color, radius, luminosity, position) {
 
     // Characteristics
     this.color = color;
-    this.radius = radius * 1e12;
+    this.radius = radius * solRadius;
     this.luminosity = luminosity;
 
     // Generate the mesh
-    geometry = new THREE.CircleBufferGeometry(radius, segmentsCircleStar);
-    material = new THREE.MeshBasicMaterial( { color: 0xFFFFFF } );
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
-    this.mesh.position = position;
+    var geometry = new THREE.CircleBufferGeometry(this.radius, segmentsCircleStar);
+    var material = new THREE.MeshBasicMaterial( { color: 0xFFFFFF } );
+    this.mesh = new THREE.Mesh(geometry, material);
+    this.mesh.position.set(position.x, position.y, position.z);
+    this.mesh.lookAt(0,0,0);
     
 }
 
