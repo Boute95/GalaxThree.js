@@ -59,12 +59,12 @@ function Universe(scene,
 						  heightSegmentsUniverseSphere);
     //var texture = new THREE.TextureLoader().load("resources/galaxy8k.jpg");
     var material = new THREE.MeshBasicMaterial({
-//	map: texture,
+	//map: texture,
 	color: 0x111111,
 	side: THREE.BackSide,
     });
     var mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh);
+    //scene.add(mesh);
 
     // Counts total number of stars.
     this.arrayStars = [];
@@ -104,15 +104,17 @@ function Star (color, radius, luminosity, position) {
 
     // Characteristics
     this.color = color;
-    this.radius = radius * solRadius;
+    this.radius = radius * solRadius * 10;
     this.luminosity = luminosity;
 
     // Generate the mesh
-    var geometry = new THREE.CircleBufferGeometry(this.radius, segmentsCircleStar);
-    var material = new THREE.MeshBasicMaterial( { color: 0xFFFFFF } );
-    this.mesh = new THREE.Mesh(geometry, material);
-    this.mesh.position.set(position.x, position.y, position.z);
-    this.mesh.lookAt(0,0,0);
+    // Generate the mesh
+    var spriteTexture = new THREE.TextureLoader().load( "resources/particle2.png" );
+    var material = new THREE.SpriteMaterial( { map: spriteTexture,
+					       color: 0xffffff } );
+    this.mesh = new THREE.Sprite( material );
+    this.mesh.scale.set( this.radius, this.radius, 1 );
+    this.mesh.position.set( position.x, position.y, position.z );
     
 }
 
