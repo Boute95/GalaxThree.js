@@ -33,52 +33,30 @@
 	
 	<script>
 
-	 //////////////////////////////
+	 //////////////////////////////////////////////////////////////////////
 	 // We suppose 1 unit = 1 km //
 	 //////////////////////////////
 
 	 // Variables
 	 const radiusUniverseInLy = 100; //< In light years.
-	 const farViewInLy = 200;
+	 const farViewInLy = 1000;
 	 var statsFPS, gui, myCanvas;
-	 var renderer, camera, controls, scene, universe;
+	 var bloomPass, composer, renderer, camera, controls, scene, universe;
 	 var params = {
 	     projection: 'normal',
 	     background: false,
-	     bloomStrength: 1.5,
+	     bloomStrength: 1.0,
 	     bloomThreshold: 0.85,
-	     bloomRadius: 0.4
+	     bloomRadius: 0.4,
 	 };
-
+	 
 	 init();
-
-	 // Composer
-	 var composer = new THREE.EffectComposer(renderer);
-
-	 // Passes post-processing
-	 var renderPass = new THREE.RenderPass(scene, camera);
-	 var bloomPass = new THREE.UnrealBloomPass(
-	     new THREE.Vector2(myCanvas.width, myCanvas.height), 1.5, 0.85, 0.4);
-	 composer.addPass(renderPass);
-	 composer.addPass(bloomPass);
-	 bloomPass.renderToScreen = true;
-
-	 // Render loop
+	 initPostProcess();
 	 render();
-
-	 // Listener for window size change
-	 window.addEventListener("resize", onWindowResize);
-	 function onWindowResize() {
-	     myCanvas.width = window.innerWidth;
-	     myCanvas.height = window.innerHeight;
-	     camera.aspect = myCanvas.width / myCanvas.height;
-	     camera.updateProjectionMatrix();
-	     renderer.setSize(myCanvas.width, myCanvas.height);
-	 }
-
 
 
 	 
+	 //////////////////////////////////////////////////////////////////////
 	 function init() {
 	     
 	     // Canvas resize
@@ -95,9 +73,8 @@
 	     
 	     // Camera
 	     camera = new THREE.PerspectiveCamera(
-		 60, myCanvas.width / myCanvas.height, 10, farViewInLy * ly);
-	     camera.position.z = 0;
-
+		 50, myCanvas.width / myCanvas.height, 10, farViewInLy * ly);
+	     
 	     // Controls
 	     controls = new THREE.OrbitControls(camera, myCanvas);
 	     controls.enableDamping = true;
@@ -130,17 +107,46 @@
 	     
 	 }
 
-
-
+	 
+	 //////////////////////////////////////////////////////////////////////
 	 function render() {
 	     statsFPS.begin();
-	     //camera.position.z -= 0.1 * ly
 	     composer.render();
 	     statsFPS.end();
 	     requestAnimationFrame(render);
 	 }
 
-	 
+
+
+	 //////////////////////////////////////////////////////////////////////
+	 function initPostProcess() {
+	     
+	     // Composer
+	     composer = new THREE.EffectComposer(renderer);
+
+	     // Passes post-processing
+	     var renderPass = new THREE.RenderPass(scene, camera);
+	     bloomPass = new THREE.UnrealBloomPass(
+		 new THREE.Vector2(myCanvas.width, myCanvas.height), 1.5, 0.85, 0.4);
+	     composer.addPass(renderPass);
+	     composer.addPass(bloomPass);
+	     bloomPass.renderToScreen = true;
+	     
+	 }
+
+
+	 //////////////////////////////////////////////////////////////////////
+	 // Listener for window size change
+	 window.addEventListener("resize", onWindowResize);
+	 function onWindowResize() {
+	     myCanvas.width = window.innerWidth;
+	     myCanvas.height = window.innerHeight;
+	     camera.aspect = myCanvas.width / myCanvas.height;
+	     camera.updateProjectionMatrix();
+	     renderer.setSize(myCanvas.width, myCanvas.height);
+	 }
+
+
 	</script>
     </body>
 </html>

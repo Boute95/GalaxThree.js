@@ -53,40 +53,24 @@ function Universe(scene,
 
     this.radiusInKm = radiusInLy * ly;
     
-    // Adds the universe mesh to the scene.
-    var geometry = new THREE.SphereBufferGeometry(this.radiusInKm,
-						  widthSegmentsUniverseSphere,
-						  heightSegmentsUniverseSphere);
-    //var texture = new THREE.TextureLoader().load("resources/galaxy8k.jpg");
-    var material = new THREE.MeshBasicMaterial({
-	//map: texture,
-	color: 0x111111,
-	side: THREE.BackSide,
-    });
-    var mesh = new THREE.Mesh(geometry, material);
-    //scene.add(mesh);
-
     // Counts total number of stars.
     this.arrayStars = [];
-    var volumeInLy = 4 * Math.PI * radiusInLy * radiusInLy * radiusInLy / 3;
-    var numberOfStars = 25000//Math.round(starDensity * volumeInLy);
+    let volumeInLy = 4 * Math.PI * radiusInLy * radiusInLy * radiusInLy / 3;
+    let numberOfStars = Math.round(starDensity * volumeInLy);
     writeConsole("Number of stars : " + numberOfStars);
 
+    let starTexture = new THREE.TextureLoader().load( "resources/particle2.png" );
+    
     // Generate stars and position them randomly
-    var spriteTexture = new THREE.TextureLoader().load( "resources/particle2.png" );
-    for (let category of arrayStarCategories) {
+    for ( let category of arrayStarCategories ) {
 
 	// Counts number of stars per category
-    	let nbOfStarsCategory = Math.round(category.proba * numberOfStars);
-	writeConsole(nbOfStarsCategory + " stars for the category " +
-		     category["spectralType"]);
+    	let nbOfStarsCategory = Math.round( category.proba * numberOfStars );
+	writeConsole( nbOfStarsCategory + " stars for the category " +
+		     category["spectralType"] );
 
 	// Create a geometry for each category with a particular material
 	let starCategoryGeometry = new THREE.Geometry();
-	let starCategoryMaterial = new THREE.PointsMaterial( {
-	    map: spriteTexture,
-	    color: 0xFFFFFF,
-	    size: category.radius * solRadius * 10, } );
 	
     	for (let i=0 ; i < nbOfStarsCategory ; ++i) {
     	    let star = new THREE.Vector3(
@@ -96,7 +80,11 @@ function Universe(scene,
 	    starCategoryGeometry.vertices.push( star );
 	}
 
-	var starsCategory = new THREE.Points(
+	let starCategoryMaterial = new THREE.PointsMaterial( {
+	    color: 0xFFFFFF,
+	    map: starTexture,
+	    size: category.radius * solRadius * 10 } );
+	let starsCategory = new THREE.Points(
 	    starCategoryGeometry, starCategoryMaterial );
 	scene.add( starsCategory );
 	
