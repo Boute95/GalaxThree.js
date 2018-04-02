@@ -32,7 +32,7 @@ var arrayStarCategories = [
     // new StarCategory("WHITEDWARF",   0.01,    0.01,       0.05),
     // new StarCategory("SUPERGIANT",   300.0,   600000.0,   0.000001),
 ];
-    
+
 
 
 
@@ -69,55 +69,40 @@ function Universe(scene,
     // Counts total number of stars.
     this.arrayStars = [];
     var volumeInLy = 4 * Math.PI * radiusInLy * radiusInLy * radiusInLy / 3;
-    var numberOfStars = Math.round(starDensity * volumeInLy);
+    var numberOfStars = 25000//Math.round(starDensity * volumeInLy);
     writeConsole("Number of stars : " + numberOfStars);
 
     // Generate stars and position them randomly
+    var spriteTexture = new THREE.TextureLoader().load( "resources/particle2.png" );
     for (let category of arrayStarCategories) {
+
+	// Counts number of stars per category
     	let nbOfStarsCategory = Math.round(category.proba * numberOfStars);
 	writeConsole(nbOfStarsCategory + " stars for the category " +
-		    category["spectralType"]);
+		     category["spectralType"]);
+
+	// Create a geometry for each category with a particular material
+	let starCategoryGeometry = new THREE.Geometry();
+	let starCategoryMaterial = new THREE.PointsMaterial( {
+	    map: spriteTexture,
+	    color: 0xFFFFFF,
+	    size: category.radius * solRadius * 10, } );
+	
     	for (let i=0 ; i < nbOfStarsCategory ; ++i) {
-    	    var star = new Star(
-		category.spectralType,
-    		category.radius,
-    		category.luminosity,
-    		new THREE.Vector3(
-		    Math.random() * 2 * this.radiusInKm - this.radiusInKm,
-    		    Math.random() * 2 * this.radiusInKm - this.radiusInKm,
-    		    Math.random() * 2 * this.radiusInKm - this.radiusInKm));
-    	    this.arrayStars.push(star);
-	    scene.add(star.mesh);
-    	}
+    	    let star = new THREE.Vector3(
+		Math.random() * 2 * this.radiusInKm - this.radiusInKm,
+    		Math.random() * 2 * this.radiusInKm - this.radiusInKm,
+    		Math.random() * 2 * this.radiusInKm - this.radiusInKm );
+	    starCategoryGeometry.vertices.push( star );
+	}
+
+	var starsCategory = new THREE.Points(
+	    starCategoryGeometry, starCategoryMaterial );
+	scene.add( starsCategory );
+	
     } // end for (category of arraystarcategories)
-   
-}
-
-
-
-
-
-/////////////////
-// Star object //
-////////////////////////////////////////////////////////////////////////////////
-function Star (color, radius, luminosity, position) {
-
-    // Characteristics
-    this.color = color;
-    this.radius = radius * solRadius * 10;
-    this.luminosity = luminosity;
-
-    // Generate the mesh
-    // Generate the mesh
-    var spriteTexture = new THREE.TextureLoader().load( "resources/particle2.png" );
-    var material = new THREE.SpriteMaterial( { map: spriteTexture,
-					       color: 0xffffff } );
-    this.mesh = new THREE.Sprite( material );
-    this.mesh.scale.set( this.radius, this.radius, 1 );
-    this.mesh.position.set( position.x, position.y, position.z );
     
 }
-
 
 
 
