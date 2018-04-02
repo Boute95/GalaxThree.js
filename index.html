@@ -11,7 +11,6 @@
 	<title>My first three.js app</title>
 	<style>
 	 body { margin: 0; overflow: hidden}
-	 canvas { width: 100%; height: 100% }
 	</style>
     </head>
 
@@ -19,9 +18,17 @@
     <body>
 	
 	<canvas id="myCanvas"></canvas>
-	
+
+	<script src="js/stats.min.js"></script>
+	<script src="js/dat.gui.min.js"></script>
 	<script src="js/three.min.js"></script>
-	<script src="js/OrbitControls.js"></script>
+	<script src="js/OrbitControls.js"></script>	
+	<script src="js/EffectComposer.js"></script>
+	<script src="js/CopyShader.js"></script> 
+	<script src="js/RenderPass.js"></script>
+	<script src="js/ShaderPass.js"></script>
+	<script src="js/LuminosityHighPassShader.js"></script>
+	<script src="js/UnrealBloomPass.js"></script>
 	<script src="js/GalaxThree.js"></script>
 	
 	<script>
@@ -32,41 +39,101 @@
 
 	 // Variables
 	 const radiusUniverseInLy = 100; //< In light years.
-	 
-	 
-	 // Renderer
-	 var myCanvas = document.getElementById("myCanvas"); 
-	 var renderer = new THREE.WebGLRenderer(
-	     {canvas : myCanvas, antialias: true, logarithmicDepthBuffer: true});
-	 renderer.setClearColor(0x222222);
-	 renderer.setPixelRatio(window.devicePixelRatio);
-	 renderer.setSize(window.innerWidth, window.innerHeight);
-	 
-	 // Camera
-	 var camera = new THREE.PerspectiveCamera(
-	     50, myCanvas.width / myCanvas.height);
-	 camera.position.z = 0;
+	 const farViewInLy = 60;
+	 var statsFPS, gui, myCanvas;
+	 var renderer, camera, controls, scene, universe;
+	 var params = {
+	     projection: 'normal',
+	     background: false,
+	     bloomStrength: 1.5,
+	     bloomThreshold: 0.85,
+	     bloomRadius: 0.4
+	 };
 
-	 // Controls
-	 var controls = new THREE.OrbitControls(camera, myCanvas);
-	 controls.enableDamping = true;
-	 controls.minDistance = 10;
-	 controls.maxDistance = 100;	 
-	 
-	 // Scene
-	 var scene = new THREE.Scene();
+	 init();
 
-	 // Universe
-	 var universe = new Universe(scene, radiusUniverseInLy);
-	 camera.far = universe.radiusInKm;
-	 camera.updateProjectionMatrix();
-	 console.log(camera.far);
+	 // Composer
+	 var composer = new THREE.EffectComposer(renderer);
+
+	 // Passes post-processing
+	 var renderPass = new THREE.RenderPass(scene, camera);
+	 var bloomPass = new THREE.UnrealBloomPass(
+	     new THREE.Vector2(myCanvas.width, myCanvas.height), 1.5, 0.85, 0.4);
+	 composer.addPass(renderPass);
+	 composer.addPass(bloomPass);
+	 bloomPass.renderToScreen = true;
 
 	 // Render loop
 	 render();
 	 function render() {
-	     renderer.render(scene, camera);
+	     statsFPS.begin();
+	     composer.render();
+	     statsFPS.end();
 	     requestAnimationFrame(render);
+	 }
+
+	 // Listener for window size change
+	 window.addEventListener("resize", onWindowResize);
+	 function onWindowResize() {
+	     myCanvas.width = window.innerWidth;
+	     myCanvas.height = window.innerHeight;
+	     camera.aspect = myCanvas.width / myCanvas.height;
+	     camera.updateProjectionMatrix();
+	     renderer.setSize(myCanvas.width, myCanvas.height);
+	 }
+
+
+
+	 
+	 function init() {
+	     
+	     // Canvas resize
+	     myCanvas = document.getElementById("myCanvas");
+	     myCanvas.width = window.innerWidth;
+	     myCanvas.height = window.innerHeight;
+
+	     // Renderer
+	     renderer = new THREE.WebGLRenderer(
+		 {canvas : myCanvas, antialias: true, logarithmicDepthBuffer: false});
+	     renderer.setClearColor(0x030303);
+	     renderer.setPixelRatio(window.devicePixelRatio);
+	     renderer.setSize(myCanvas.width, myCanvas.height);
+	     
+	     // Camera
+	     camera = new THREE.PerspectiveCamera(
+		 60, myCanvas.width / myCanvas.height, 10, farViewInLy * ly);
+	     camera.position.z = 0;
+
+	     // Controls
+	     controls = new THREE.OrbitControls(camera, myCanvas);
+	     controls.enableDamping = true;
+	     controls.minDistance = 10;
+	     controls.maxDistance = 100;	 
+	     
+	     // Scene
+	     scene = new THREE.Scene();
+
+	     // Universe
+	     universe = new Universe(scene, radiusUniverseInLy);
+
+	     // Monitoring
+	     statsFPS = new Stats();
+	     statsFPS.showPanel(0);
+	     document.body.appendChild(statsFPS.dom);
+
+	     // GUI
+	     gui = new dat.GUI();
+	     gui.add( params, 'bloomThreshold', 0.0, 1.0 ).onChange( function ( value ) {
+		 bloomPass.threshold = Number( value );
+	     } );
+	     gui.add( params, 'bloomStrength', 0.0, 10.0 ).onChange( function ( value ) {
+		 bloomPass.strength = Number( value );
+	     } );
+	     gui.add( params, 'bloomRadius', 0.0, 2.0 ).onChange( function ( value ) {
+		 bloomPass.radius = Number( value );
+	     } );
+	     gui.open();
+	     
 	 }
 	 
 	</script>

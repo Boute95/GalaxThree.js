@@ -9,7 +9,7 @@
 
 var ly = 9.46073047e12; //< Light year
 var solRadius = 6.957e5;
-var segmentsCircleStar = 4
+var segmentsCircleStar = 8;
 var heightSegmentsUniverseSphere = 32;
 var widthSegmentsUniverseSphere = 24;
 
@@ -46,10 +46,10 @@ var arrayStarCategories = [
  * @param starDensity Number of stars per cubic light year.
  * @param positionOfCenter Position of sphere's center in the world coordinates.
  */ 
-function Universe (scene,
-		   radiusInLy,
-		   starDensity = 0.004,
-		   positionOfCenter = new THREE.Vector3(0,0,0)) {
+function Universe(scene,
+		  radiusInLy,
+		  starDensity = 0.004,
+		  positionOfCenter = new THREE.Vector3(0,0,0)) {
 
     this.radiusInKm = radiusInLy * ly;
     
@@ -57,9 +57,10 @@ function Universe (scene,
     var geometry = new THREE.SphereBufferGeometry(this.radiusInKm,
 						  widthSegmentsUniverseSphere,
 						  heightSegmentsUniverseSphere);
-    var texture = new THREE.TextureLoader().load("resources/galaxy8k.jpg");
+    //var texture = new THREE.TextureLoader().load("resources/galaxy8k.jpg");
     var material = new THREE.MeshBasicMaterial({
-	map: texture,
+//	map: texture,
+	color: 0x111111,
 	side: THREE.BackSide,
     });
     var mesh = new THREE.Mesh(geometry, material);
@@ -69,12 +70,12 @@ function Universe (scene,
     this.arrayStars = [];
     var volumeInLy = 4 * Math.PI * radiusInLy * radiusInLy * radiusInLy / 3;
     var numberOfStars = Math.round(starDensity * volumeInLy);
-    console.log("[Universe] Number of stars : " + numberOfStars);
+    writeConsole("Number of stars : " + numberOfStars);
 
     // Generate stars and position them randomly
     for (let category of arrayStarCategories) {
     	let nbOfStarsCategory = Math.round(category.proba * numberOfStars);
-	console.log(nbOfStarsCategory + " stars for the category " +
+	writeConsole(nbOfStarsCategory + " stars for the category " +
 		    category["spectralType"]);
     	for (let i=0 ; i < nbOfStarsCategory ; ++i) {
     	    var star = new Star(
@@ -103,7 +104,7 @@ function Star (color, radius, luminosity, position) {
 
     // Characteristics
     this.color = color;
-    this.radius = radius * solRadius * 2;
+    this.radius = radius * solRadius;
     this.luminosity = luminosity;
 
     // Generate the mesh
@@ -116,3 +117,12 @@ function Star (color, radius, luminosity, position) {
 }
 
 
+
+
+
+/////////////////////
+// Other functions //
+////////////////////////////////////////////////////////////////////////////////
+function writeConsole(string) {
+    console.log("[GALAX3] " + string);
+}
