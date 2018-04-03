@@ -19,17 +19,17 @@
 	
 	<canvas id="myCanvas"></canvas>
 
-	<script src="js/stats.min.js"></script>
-	<script src="js/dat.gui.min.js"></script>
-	<script src="js/three.min.js"></script>
-	<script src="js/OrbitControls.js"></script>	
-	<script src="js/EffectComposer.js"></script>
-	<script src="js/CopyShader.js"></script> 
-	<script src="js/RenderPass.js"></script>
-	<script src="js/ShaderPass.js"></script>
-	<script src="js/LuminosityHighPassShader.js"></script>
-	<script src="js/UnrealBloomPass.js"></script>
-	<script src="js/GalaxThree.js"></script>
+	<script src="../js/stats.min.js"></script>
+	<script src="../js/dat.gui.min.js"></script>
+	<script src="../js/three.min.js"></script>
+	<script src="../js/OrbitControls.js"></script>	
+	<script src="../js/EffectComposer.js"></script>
+	<script src="../js/CopyShader.js"></script> 
+	<script src="../js/RenderPass.js"></script>
+	<script src="../js/ShaderPass.js"></script>
+	<script src="../js/LuminosityHighPassShader.js"></script>
+	<script src="../js/UnrealBloomPass.js"></script>
+	<script src="../js/GalaxThree.js"></script>
 	
 	<script>
 
@@ -74,6 +74,9 @@
 	     // Camera
 	     camera = new THREE.PerspectiveCamera(
 		 50, myCanvas.width / myCanvas.height, 10, farViewInLy * ly);
+	     camera.position.z = 500 * ly;
+	     camera.rotation.z = Math.PI / 2;
+	     camera.updateProjectionMatrix();
 	     
 	     // Controls
 	     controls = new THREE.OrbitControls(camera, myCanvas);
@@ -86,8 +89,9 @@
 
 	     // Universe
 	     universe = new Universe(scene,
-				     "resources/particle2.png",
-				     radiusUniverseInLy);
+				     "../resources/particle2.png",
+				     radiusUniverseInLy,
+				     0.04);
 
 	     // Monitoring
 	     statsFPS = new Stats();

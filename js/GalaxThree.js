@@ -44,9 +44,10 @@ var arrayStarCategories = [
  * Constructor for Universe object. It is a big sphere.
  * @param radius Radius of the universe in light year.
  * @param starDensity Number of stars per cubic light year.
- * @param positionOfCenter Position of sphere's center in the world coordinates.
+ * @param positionOfCenter Position of universe's center in the world coordinates.
  */ 
 function Universe(scene,
+		  starImagePath,
 		  radiusInLy,
 		  starDensity = 0.004,
 		  positionOfCenter = new THREE.Vector3(0,0,0)) {
@@ -59,31 +60,44 @@ function Universe(scene,
     let numberOfStars = Math.round(starDensity * volumeInLy);
     writeConsole("Number of stars : " + numberOfStars);
 
-    let starTexture = new THREE.TextureLoader().load( "resources/particle2.png" );
+    let starTexture = new THREE.TextureLoader().load( starImagePath );
     
-    // Generate stars and position them randomly
+    // For each category of stars ...
     for ( let category of arrayStarCategories ) {
 
-	// Counts number of stars per category
+	// Counts number of stars per category.
     	let nbOfStarsCategory = Math.round( category.proba * numberOfStars );
 	writeConsole( nbOfStarsCategory + " stars for the category " +
 		     category["spectralType"] );
 
-	// Create a geometry for each category with a particular material
+	// Create a geometry for each category with a particular material.
 	let starCategoryGeometry = new THREE.Geometry();
-	
+
+	// Generate category's stars in a random position in the universe's sphere.
     	for (let i=0 ; i < nbOfStarsCategory ; ++i) {
-    	    let star = new THREE.Vector3(
-		Math.random() * 2 * this.radiusInKm - this.radiusInKm,
-    		Math.random() * 2 * this.radiusInKm - this.radiusInKm,
-    		Math.random() * 2 * this.radiusInKm - this.radiusInKm );
+	    // Random numbers in spherical coordinates.
+	    let phi = Math.random() * 2 * Math.PI;
+	    let costheta = 2 * Math.random() - 1;
+	    let u = Math.random();
+	    let theta = Math.acos( costheta );
+	    let r = this.radiusInKm * Math.cbrt( u );
+	    // Converts in cartesian coordinates.
+            let x = r * Math.sin( theta ) * Math.cos( phi );
+            let y = r * Math.sin( theta ) * Math.sin( phi );
+            let z = r * Math.cos( theta );
+	    // And we can finally create a star.
+    	    let star = new THREE.Vector3( x, y, z );
 	    starCategoryGeometry.vertices.push( star );
 	}
 
+	// Material of category's stars.
 	let starCategoryMaterial = new THREE.PointsMaterial( {
 	    color: 0xFFFFFF,
 	    map: starTexture,
-	    size: category.radius * solRadius * 10 } );
+	    size: category.radius * solRadius * 10,
+	    transparent: true, } );
+
+	// Take all the stars into a Points object.
 	let starsCategory = new THREE.Points(
 	    starCategoryGeometry, starCategoryMaterial );
 	scene.add( starsCategory );
