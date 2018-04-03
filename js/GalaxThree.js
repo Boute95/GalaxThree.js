@@ -137,7 +137,7 @@ function addStars( scene, numberOfStars, radiusInKm, starTexture ) {
 	    let materialStarType = new THREE.PointsMaterial( {
 		color: colorStarType,
 		map: starTexture,
-		size: category.radius * solRadius * 1e6,
+		size: Math.pow( category.luminosity, 1/3 ) * 1e12,
 		transparent: true, } );
 
 	    // Put all the stars of the type into a Points object.
