@@ -128,7 +128,7 @@ function addStars( scene, numberOfStars, radiusInKm, starTexture ) {
 	    
 	    // Generate stars in the universe's sphere.
 	    for (let i = 0 ; i < nbOfStarsCategory ; ++i) {
-		let star = randomPosInSphere( radiusInKm );
+		let star = randomPosInSpiral( radiusInKm );
 		geomStarType.vertices.push( star );
 	    }
 	    
@@ -156,18 +156,26 @@ function addStars( scene, numberOfStars, radiusInKm, starTexture ) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-function randomPosInSphere( radius ) {
+function randomPosInSpiral( radius ) {
     let vect = new THREE.Vector3();
-    // Random numbers in spherical coordinates.
-    let phi = Math.random() * 2 * Math.PI;
-    let costheta = 2 * Math.random() - 1;
-    let u = Math.random();
-    let theta = Math.acos( costheta );
-    let r = radius * Math.cbrt( u );
-    // Converts in cartesian coordinates.
-    vect.x = r * Math.sin( theta ) * Math.cos( phi );
-    vect.y = r * Math.sin( theta ) * Math.sin( phi );
-    vect.z = r * Math.cos( theta );
+    let b = 0.2;
+    let a = radius / Math.exp( b * Math.PI );
+    let theta = Math.random() * Math.PI;
+    let r = a * Math.exp( b * theta );
+    // Converts into cartesian coodinates.
+    vect.x = r * Math.cos( theta );
+    vect.z = r * Math.sin( theta );
+    vect.y = 0;
+    // // Random numbers in spherical coordinates.
+    // let phi = Math.random() * 2 * Math.PI;
+    // let costheta = 2 * Math.random() - 1;
+    // let u = Math.random();
+    // let theta = Math.acos( costheta );
+    // let r = radius * Math.cbrt( u );
+    // // Converts in cartesian coordinates.
+    // vect.x = r * Math.sin( theta ) * Math.cos( phi );
+    // vect.y = r * Math.sin( theta ) * Math.sin( phi );
+    // vect.z = r * Math.cos( theta );
     // And we can finally return the position
     return vect;
 }

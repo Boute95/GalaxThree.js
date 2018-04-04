@@ -74,8 +74,8 @@
 	     // Camera
 	     camera = new THREE.PerspectiveCamera(
 		 50, myCanvas.width / myCanvas.height, 10, farViewInLy * ly);
-	     camera.position.z = 500 * ly;
-	     camera.rotation.z = Math.PI / 2;
+	     camera.position.y = 200 * ly;
+	     camera.rotation.z = Math.PI;
 	     camera.updateProjectionMatrix();
 	     
 	     // Controls
@@ -91,7 +91,7 @@
 	     universe = new Universe(scene,
 				     "../resources/particle1.png",
 				     radiusUniverseInLy,
-				     0.3);
+				     0.001);
 
 	     // Monitoring
 	     statsFPS = new Stats();
