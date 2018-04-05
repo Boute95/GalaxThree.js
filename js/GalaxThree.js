@@ -7,11 +7,8 @@
  * Let's suppose 1 unit = 1 kilometers.
  */
 
-var ly = 9.46073047e12; //< Light year
+var ly = 9.46073047e12; //< 1 Light year in km.
 var solRadius = 6.957e5;
-var segmentsCircleStar = 8;
-var heightSegmentsUniverseSphere = 32;
-var widthSegmentsUniverseSphere = 24;
 
 function StarCategory(name, spectralTypes, radius, luminosity, proba) {
     this.name = name;
@@ -20,29 +17,6 @@ function StarCategory(name, spectralTypes, radius, luminosity, proba) {
     this.luminosity = luminosity;
     this.proba = proba;
 }
-
-var arrayStarCategories = [
-    new StarCategory("MS_M",["M"],
-		     0.3,     0.01,       0.8),
-    new StarCategory("MS_K",["K"],
-		     0.8,     0.2,        0.08),
-    new StarCategory("MS_G",["G"],
-		     1.0,     1.0,        0.035),
-    new StarCategory("MS_F",["F"],
-		     1.3,     4.0,        0.02),
-    new StarCategory("MS_A",["A"],
-		     1.7,     20.0,       0.007),
-    new StarCategory("MS_B",["B"],
-		     5.0,     1000,       0.001),
-    new StarCategory("MS_O",["O"],
-		     10.0,    100000.0,   0.0000001),
-    new StarCategory("G",   ["G","K","M"],
-		     30.0,    600.0,      0.004),
-    new StarCategory("WD",  ["D"],
-		     0.01,    0.01,       0.05),
-    new StarCategory("SG",  ["O","B","A","F","G","K","M"],
-		     300.0,   600000.0,   0.000001),
-];
 
 var spectralTypeToColor = {
     M : 0xFFCC6F,
@@ -61,42 +35,82 @@ var spectralTypeToColor = {
 
 
 /////////////////////
-// Universe object //
+// Galaxy object //
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Constructor for Universe object. It is a big sphere.
- * @param radius Radius of the universe in light year.
+ * Constructor for Galaxy object. It is a big sphere.
+ * @param radius Radius of the galaxy in light year.
  * @param starDensity Number of stars per cubic light year.
- * @param positionOfCenter Position of universe's center in the world coordinates.
+ * @param positionOfCenter Position of galaxy's center in the world coordinates.
  */ 
-function Universe(scene,
-		  starImagePath,
-		  radiusInLy,
-		  starDensity = 0.004,
-		  positionOfCenter = new THREE.Vector3(0,0,0)) {
-
-    this.radiusInKm = radiusInLy * ly;
+function Galaxy(scene,
+		starImagePath,
+		radiusInLy = 200,
+		numberOfStars = 1e6,
+		numberOfBranches = 2,
+		phi = 0.4,
+		maxAngleBranchRadian = 2 * Math.PI) {
     
-    // Counts total number of stars.
-    this.arrayStars = [];
-    let volumeInLy = 4 * Math.PI * radiusInLy * radiusInLy * radiusInLy / 3;
-    let numberOfStars = Math.round(starDensity * volumeInLy);
+    this.radiusInKm = radiusInLy * ly;
+    this.arrayStarCategories = [
+	new StarCategory("MS_M",["M"],
+			 0.3,     0.01,       0.8),
+	new StarCategory("MS_K",["K"],
+			 0.8,     0.2,        0.08),
+	new StarCategory("MS_G",["G"],
+			 1.0,     1.0,        0.035),
+	new StarCategory("MS_F",["F"],
+			 1.3,     4.0,        0.02),
+	new StarCategory("MS_A",["A"],
+			 1.7,     20.0,       0.007),
+	new StarCategory("MS_B",["B"],
+			 5.0,     1000,       0.001),
+	new StarCategory("MS_O",["O"],
+			 10.0,    100000.0,   0.0000001),
+	new StarCategory("G",   ["G","K","M"],
+			 30.0,    600.0,      0.004),
+	new StarCategory("WD",  ["D"],
+			 0.01,    0.01,       0.05),
+	new StarCategory("SG",  ["O","B","A","F","G","K","M"],
+			 300.0,   600000.0,   0.000001),
+    ];
+
     writeConsole("Number of stars : " + numberOfStars);
 
-    // Generates stars
+    // Generates the two branches of the galaxy's spiral
     let starTexture = new THREE.TextureLoader().load( starImagePath );
-    addStars( scene, numberOfStars, this.radiusInKm, starTexture );
+
+    generateSpiralBranch( scene,
+			  numberOfStars / numberOfBranches,
+			  this.radiusInKm,
+			  phi,
+			  maxAngleBranchRadian,
+			  false,
+			  starTexture,
+			  this.arrayStarCategories );
+    generateSpiralBranch( scene,
+			  numberOfStars / numberOfBranches,
+			  this.radiusInKm,
+			  phi,
+			  maxAngleBranchRadian,
+			  true,
+			  starTexture,
+			  this.arrayStarCategories );
     
-    
-    
+	
 }
 
 
-
-
 ////////////////////////////////////////////////////////////////////////////////
-function addStars( scene, numberOfStars, radiusInKm, starTexture ) {
+function generateSpiralBranch( scene,
+			       numberOfStars,
+			       radiusInKm,
+			       phi,
+			       maxAngleRadian,
+			       negative,
+			       starTexture,
+			       arrayStarCategories ) {
 
     // For each category of stars ...
     for ( let category of arrayStarCategories ) {
@@ -125,19 +139,21 @@ function addStars( scene, numberOfStars, radiusInKm, starTexture ) {
 	for ( let spectralType of arraySpectralTypes ) {
 
 	    let geomStarType = new THREE.Geometry();
-	    
-	    // Generate stars in the universe's sphere.
-	    for (let i = 0 ; i < nbOfStarsCategory ; ++i) {
-		let star = randomPosInSpiral( radiusInKm );
-		geomStarType.vertices.push( star );
-	    }
-	    
+
+	    placeVerticesInSpiral( geomStarType,
+				   numberOfStars,
+				   radiusInKm,
+				   phi,
+				   maxAngleRadian,
+				   negative );
+				   
 	    // Set the star's type material
 	    let colorStarType = spectralTypeToColor[spectralType];
 	    let materialStarType = new THREE.PointsMaterial( {
 		color: colorStarType,
 		map: starTexture,
 		size: Math.pow( category.luminosity, 1/3 ) * 1e12,
+		blending: THREE.AdditiveBlending,
 		transparent: true, } );
 
 	    // Put all the stars of the type into a Points object.
@@ -152,33 +168,53 @@ function addStars( scene, numberOfStars, radiusInKm, starTexture ) {
 }
 
 
-
-
-
 ////////////////////////////////////////////////////////////////////////////////
-function randomPosInSpiral( radius ) {
-    let vect = new THREE.Vector3();
-    let b = 0.2;
-    let a = radius / Math.exp( b * Math.PI );
-    let theta = Math.random() * Math.PI;
-    let r = a * Math.exp( b * theta );
-    // Converts into cartesian coodinates.
-    vect.x = r * Math.cos( theta );
-    vect.z = r * Math.sin( theta );
-    vect.y = 0;
-    // // Random numbers in spherical coordinates.
-    // let phi = Math.random() * 2 * Math.PI;
-    // let costheta = 2 * Math.random() - 1;
-    // let u = Math.random();
-    // let theta = Math.acos( costheta );
-    // let r = radius * Math.cbrt( u );
-    // // Converts in cartesian coordinates.
-    // vect.x = r * Math.sin( theta ) * Math.cos( phi );
-    // vect.y = r * Math.sin( theta ) * Math.sin( phi );
-    // vect.z = r * Math.cos( theta );
-    // And we can finally return the position
-    return vect;
+function placeVerticesInSpiral( geometry,
+				numberOfStars,
+				radius,
+				phi,
+				maxAngleRadian,
+				negative ) {
+    
+    
+    /////////////////////////////////////////////////////////////////////////////////
+    // Logarithmic spiral : r = R / ( 1 - phi * tan( phi ) * log ( theta / phi ) ) //
+    /////////////////////////////////////////////////////////////////////////////////
+    /*
+     * For more information about the formula, consult this article :
+     * https://arxiv.org/pdf/0908.0892.pdf
+     */
+    
+    let T = phi * Math.tan( phi ); //<  Pre-calculate phi * tan ( phi ) 
+    let R = radius * ( 1 - T * Math.log( maxAngleRadian / phi ) );
+    writeConsole( R );
+    if ( negative ) {
+	R = -R;
+    }
+
+    // Place stars on the spiral branch
+    for (let i = 0 ; i < numberOfStars ; ++i) {
+	
+	let starVertex = new THREE.Vector3();
+	
+	// Generate random position in spiral in polar coordinates.
+	let theta = Math.random() * maxAngleRadian;
+	let r = R / ( 1 - T * Math.log( theta / phi ) );
+	
+	// Converts into cartesian coordinates.
+	starVertex.x = r * Math.cos( theta );
+	starVertex.z = r * Math.sin( theta );
+	starVertex.y = 0;
+	
+	// And finally pushes the vertex
+	geometry.vertices.push( starVertex );
+	
+    }
+    
 }
+
+
+
 
 
 /////////////////////
