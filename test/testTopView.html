@@ -73,7 +73,7 @@
 	     
 	     // Camera
 	     camera = new THREE.PerspectiveCamera(
-		 50, myCanvas.width / myCanvas.height, 10, farViewInLy * ly);
+		 50, myCanvas.width / myCanvas.height, 10, farViewInLy * ly );
 	     camera.position.y = 400 * ly;
 	     camera.rotation.z = Math.PI;
 	     camera.updateProjectionMatrix();
@@ -91,8 +91,7 @@
 	     galaxy = new Galaxy(scene,
 				 "../resources/particle1.png",
 				 radiusGalaxyInLy,
-				 1e3,
-				 2,
+				 1e5,
 				 0.52 );
 	      
 

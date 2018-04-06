@@ -48,7 +48,6 @@ function Galaxy(scene,
 		starImagePath,
 		radiusInLy = 200,
 		numberOfStars = 1e6,
-		numberOfBranches = 2,
 		phi = 0.4,
 		maxAngleBranchRadian = 2 * Math.PI) {
     
@@ -80,40 +79,9 @@ function Galaxy(scene,
 
     // Generates the two branches of the galaxy's spiral
     let starTexture = new THREE.TextureLoader().load( starImagePath );
-
-    generateSpiralBranch( scene,
-			  numberOfStars / numberOfBranches,
-			  this.radiusInKm,
-			  phi,
-			  maxAngleBranchRadian,
-			  false,
-			  starTexture,
-			  this.arrayStarCategories );
-    generateSpiralBranch( scene,
-			  numberOfStars / numberOfBranches,
-			  this.radiusInKm,
-			  phi,
-			  maxAngleBranchRadian,
-			  true,
-			  starTexture,
-			  this.arrayStarCategories );
     
-	
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-function generateSpiralBranch( scene,
-			       numberOfStars,
-			       radiusInKm,
-			       phi,
-			       maxAngleRadian,
-			       negative,
-			       starTexture,
-			       arrayStarCategories ) {
-
     // For each category of stars ...
-    for ( let category of arrayStarCategories ) {
+    for ( let category of this.arrayStarCategories ) {
 
 	// Counts number of stars for the category.
     	let nbOfStarsCategory = Math.round( category.proba * numberOfStars );
@@ -138,32 +106,90 @@ function generateSpiralBranch( scene,
 	// Generate stars for each spectralType of the category
 	for ( let spectralType of arraySpectralTypes ) {
 
-	    let geomStarType = new THREE.Geometry();
-
-	    placeVerticesInSpiral( geomStarType,
-				   numberOfStars,
-				   radiusInKm,
-				   phi,
-				   maxAngleRadian,
-				   negative );
-				   
+	    let geometryStarType = new THREE.Geometry();
+	    generateCluster( geometryStarType,
+			     numberOfStars / 6,
+			     this.radiusInKm / 2 );
+	    generateSpiral( geometryStarType,
+	    		    2 * numberOfStars / 3,
+	    		    this.radiusInKm,
+	    		    phi,
+	    		    maxAngleBranchRadian );
+	    
 	    // Set the star's type material
 	    let colorStarType = spectralTypeToColor[spectralType];
 	    let materialStarType = new THREE.PointsMaterial( {
 		color: colorStarType,
 		map: starTexture,
-		size: Math.pow( category.luminosity, 1/3 ) * 1e12,
+		size: Math.pow( category.luminosity, 1/3.2 ) * 1e11,
 		blending: THREE.AdditiveBlending,
 		transparent: true, } );
 
 	    // Put all the stars of the type into a Points object.
 	    let starsType = new THREE.Points(
-		geomStarType, materialStarType );
+		geometryStarType, materialStarType );
 	    scene.add( starsType );
 
 	} // end for ( spectralType of arraySpectralTypes )
 	
     } // end for ( category of arrayStarCategories )
+    
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+function generateCluster( geometry,
+			  numberOfStars,
+			  radiusInKm,
+			  dispersion,
+			  starTexture,
+			  arrayStarCategories ) {
+
+    // Place stars on the spiral branch
+    for (let i = 0 ; i < numberOfStars ; ++i) {
+	
+	let starVertex = new THREE.Vector3();
+	
+	// Generate random position in spiral in polar coordinates.
+	let theta = Math.random() * 2 * Math.PI;
+	let phi = Math.random() * Math.PI;
+	let r = randomGauss( 0, 1 ) * ( radiusInKm / 3 );
+	
+	// Converts into cartesian coordinates.
+	starVertex.x = r * Math.cos( theta ) * Math.sin( phi );
+	starVertex.z = r * Math.sin( theta ) * Math.sin( phi );
+	starVertex.y = r * Math.cos( phi );
+	
+	// And finally pushes the vertex
+	geometry.vertices.push( starVertex );
+	
+    }
+
+    
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+function generateSpiral( geometry,
+			 numberOfStars,
+			 radiusInKm,
+			 phi,
+			 maxAngleRadian ) {
+    
+    placeVerticesInSpiral( geometry,
+			   numberOfStars / 2,
+			   radiusInKm,
+			   phi,
+			   maxAngleRadian,
+			   true );
+    placeVerticesInSpiral( geometry,
+			   numberOfStars / 2,
+			   radiusInKm,
+			   phi,
+			   maxAngleRadian,
+			   false );
+    
     
 }
 
@@ -177,9 +203,9 @@ function placeVerticesInSpiral( geometry,
 				negative ) {
     
     
-    /////////////////////////////////////////////////////////////////////////////////
-    // Logarithmic spiral : r = R / ( 1 - phi * tan( phi ) * log ( theta / phi ) ) //
-    /////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////
+    // Logarithmic spiral : r = R / ( 1 - phi * tan( phi ) * log ( theta/phi ) ) //
+    ///////////////////////////////////////////////////////////////////////////////
     /*
      * For more information about the formula, consult this article :
      * https://arxiv.org/pdf/0908.0892.pdf
@@ -187,7 +213,6 @@ function placeVerticesInSpiral( geometry,
     
     let T = phi * Math.tan( phi ); //<  Pre-calculate phi * tan ( phi ) 
     let R = radius * ( 1 - T * Math.log( maxAngleRadian / phi ) );
-    writeConsole( R );
     if ( negative ) {
 	R = -R;
     }
@@ -200,6 +225,7 @@ function placeVerticesInSpiral( geometry,
 	// Generate random position in spiral in polar coordinates.
 	let theta = Math.random() * maxAngleRadian;
 	let r = R / ( 1 - T * Math.log( theta / phi ) );
+	r += randomGauss( 0, 1 ) * 10 * ly;
 	
 	// Converts into cartesian coordinates.
 	starVertex.x = r * Math.cos( theta );
@@ -220,6 +246,18 @@ function placeVerticesInSpiral( geometry,
 /////////////////////
 // Other functions //
 ////////////////////////////////////////////////////////////////////////////////
+/**
+ * Generate a random number with normal distribution N(0,1) 
+ */
+function randomGauss( mu = 0, sigma = 1 ) {
+    let u = Math.random();
+    let v = Math.random();
+    let Z = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2 * Math.PI * v );
+    return Z * sigma + mu;
+}
+
+
+
 function writeConsole(string) {
     console.log("[GALAX3] " + string);
 }
