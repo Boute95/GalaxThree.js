@@ -50,7 +50,8 @@ function Galaxy(scene,
 		heightInLy = 5,
 		numberOfStars = 1e6,
 		phi = 0.4,
-		maxAngleBranchRadian = 2 * Math.PI) {
+		maxAngleBranchRadian = 2 * Math.PI,
+	       coreRadiusCoef = 0.25 ) {
     
     this.radiusInKm = radiusInLy * ly;
     this.heightInKm = heightInLy * ly;
@@ -111,12 +112,12 @@ function Galaxy(scene,
 	    // Places the stars.
 	    let geometryStarType = new THREE.Geometry();
 	    generateCluster( geometryStarType,
-			     numberOfStars / 6,
-			     this.radiusInKm / 2 );
+			     numberOfStars / 5,
+			     this.radiusInKm * coreRadiusCoef );
 	    generateSpiral( geometryStarType,
 	    		    2 * numberOfStars / 3,
 	    		    this.radiusInKm,
-			    this.heightInKm,
+	    		    this.heightInKm,
 	    		    phi,
 	    		    maxAngleBranchRadian );
 	    
@@ -147,26 +148,16 @@ function Galaxy(scene,
     function generateCluster( geometry,
 			      numberOfStars,
 			      radiusInKm,
-			      dispersion,
-			      starTexture,
-			      arrayStarCategories ) {
+			      flatteningCoef = 0.25 ) {
 
-	// Place stars on the spiral branch
 	for (let i = 0 ; i < numberOfStars ; ++i) {
 	    
 	    let starVertex = new THREE.Vector3();
+
+	    starVertex.x = randomGauss( 0, 1 ) * ( radiusInKm / 3 );
+	    starVertex.y = randomGauss( 0, 1 - flatteningCoef ) * ( radiusInKm / 3 );
+	    starVertex.z = randomGauss( 0, 1 ) * ( radiusInKm / 3 );
 	    
-	    // Generate random position in spiral in polar coordinates.
-	    let theta = Math.random() * 2 * Math.PI;
-	    let phi = Math.random() * Math.PI;
-	    let r = randomGauss( 0, 1 ) * ( radiusInKm / 3 );
-	    
-	    // Converts into cartesian coordinates.
-	    starVertex.x = r * Math.cos( theta ) * Math.sin( phi );
-	    starVertex.z = r * Math.sin( theta ) * Math.sin( phi );
-	    starVertex.y = r * Math.cos( phi );
-	    
-	    // And finally pushes the vertex
 	    geometry.vertices.push( starVertex );
 	    
 	}
