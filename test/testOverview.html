@@ -81,8 +81,8 @@
 	     // Controls
 	     controls = new THREE.OrbitControls(camera, myCanvas);
 	     controls.enableDamping = true;
-	     controls.minDistance = 10;
-	     controls.maxDistance = 100;	 
+	     controls.minDistance = ly;
+	     controls.maxDistance = 400 * ly;
 	     
 	     // Scene
 	     scene = new THREE.Scene();
@@ -91,9 +91,11 @@
 	     galaxy = new Galaxy(scene,
 				 "../resources/particle1.png",
 				 radiusGalaxyInLy,
+				 5,
 				 1e5,
-				 0.52 );
-	      
+				 0.52,
+				 2.25 * Math.PI );
+				 	      
 
 	     // Monitoring
 	     statsFPS = new Stats();
