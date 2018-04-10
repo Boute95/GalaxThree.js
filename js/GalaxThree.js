@@ -218,7 +218,7 @@ function Galaxy(scene,
 	    R = -R;
 	}
 	let startGreaterDispersionRad = maxAngleRadian - Math.PI / 2;
-	let startLessStarsRatio = 0.3
+	let startLessStarsRatio = 0.5;
 
 	// Place stars on the spiral branch
 	for (let i = 0 ; i < numberOfStars ; ++i) {
@@ -289,12 +289,11 @@ function randomLessInEnd( beginDecrease ) {
 	    / 2 + 0.5;
 
 	if ( v > k ) {
-	    u = Math.random() * u;
+	    u = randomLessInEnd( beginDecrease );
 	}
 
     }
     
-    //writeConsole( "v = " + v + " k = " + k + " u = " + u );
     return u;
 }
 
