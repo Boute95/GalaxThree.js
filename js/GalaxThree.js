@@ -218,7 +218,7 @@ function Galaxy(scene,
 	    R = -R;
 	}
 	let startGreaterDispersionRad = maxAngleRadian - Math.PI / 2;
-	let startGreaterDispersionCoef = 0.2;//startGreaterDispersionRad / maxAngleRadian;
+	let startLessStarsRatio = 0.3
 
 	// Place stars on the spiral branch
 	for (let i = 0 ; i < numberOfStars ; ++i) {
@@ -226,7 +226,7 @@ function Galaxy(scene,
 	    let starVertex = new THREE.Vector3();
 	    
 	    // Generate random position in spiral in polar coordinates.
-	    let theta = randomLessInEnd( startGreaterDispersionCoef ) * maxAngleRadian;
+	    let theta = randomLessInEnd( startLessStarsRatio ) * maxAngleRadian;
 	    let dispersion;
 	    
 	    if ( theta < startGreaterDispersionRad ) {
@@ -282,14 +282,19 @@ function randomLessInEnd( beginDecrease ) {
     
     let u = Math.random();
     let v = Math.random();
+    let k = 1;
 
-    if ( v > beginDecrease ) {
-	//let k = 0.6; //Math.cos( ( u - beginDecrease ) * Math.PI / ( 1 - u ) );
-	//if ( u > k ) {
-	    u -= beginDecrease;
-	//}
+    if ( u > beginDecrease ) {
+	k = Math.cos( ( u - beginDecrease ) * ( Math.PI / ( 1 - beginDecrease ) ) )
+	    / 2 + 0.5;
+
+	if ( v > k ) {
+	    u = Math.random() * u;
+	}
+
     }
-
+    
+    //writeConsole( "v = " + v + " k = " + k + " u = " + u );
     return u;
 }
 
