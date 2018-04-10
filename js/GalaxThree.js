@@ -218,7 +218,7 @@ function Galaxy(scene,
 	    R = -R;
 	}
 	let startGreaterDispersionRad = maxAngleRadian - Math.PI / 2;
-	let startGreaterDispersionCoef = startGreaterDispersionRad / maxAngleRadian;
+	let startGreaterDispersionCoef = 0.2;//startGreaterDispersionRad / maxAngleRadian;
 
 	// Place stars on the spiral branch
 	for (let i = 0 ; i < numberOfStars ; ++i) {
@@ -226,10 +226,11 @@ function Galaxy(scene,
 	    let starVertex = new THREE.Vector3();
 	    
 	    // Generate random position in spiral in polar coordinates.
-	    let theta = Math.random() * maxAngleRadian;
+	    let theta = randomLessInEnd( startGreaterDispersionCoef ) * maxAngleRadian;
 	    let dispersion;
+	    
 	    if ( theta < startGreaterDispersionRad ) {
-		dispersion = 10 * ly;
+	    	dispersion = 10 * ly;
 	    }
 	    else {
 	    	dispersion = 10 * ly + 10 * ly *
@@ -269,6 +270,28 @@ function randomGauss( mu = 0, sigma = 1 ) {
     return Z * sigma + mu;
 }
 
+
+
+/**
+ * Generate a random number with a uniform distribution in [ 0, beginDecrease ] 
+ * and with decreasing density in [ beginDecrease, 1 ].
+ * @param beginDecrease Number between 0 and 1. The probability of appearance
+ * of a number from beginDecrease to 1 will decrease.
+ */
+function randomLessInEnd( beginDecrease ) {
+    
+    let u = Math.random();
+    let v = Math.random();
+
+    if ( v > beginDecrease ) {
+	//let k = 0.6; //Math.cos( ( u - beginDecrease ) * Math.PI / ( 1 - u ) );
+	//if ( u > k ) {
+	    u -= beginDecrease;
+	//}
+    }
+
+    return u;
+}
 
 
 function writeConsole(string) {
