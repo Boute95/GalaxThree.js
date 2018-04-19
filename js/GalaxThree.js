@@ -111,15 +111,21 @@ function Galaxy(scene,
 
 	    // Places the stars.
 	    let geometryStarType = new THREE.Geometry();
-	    generateCluster( geometryStarType,
-			     numberOfStars / 5,
-			     this.radiusInKm * coreRadiusCoef );
+	    // generateCluster( geometryStarType,
+	    // 		     numberOfStars / 6,
+	    // 		     this.radiusInKm * coreRadiusCoef );
 	    generateSpiral( geometryStarType,
-	    		    2 * numberOfStars / 3,
+	    		    4 * numberOfStars / 6,
 	    		    this.radiusInKm,
 	    		    this.heightInKm,
 	    		    phi,
 	    		    maxAngleBranchRadian );
+	    // generateSpiral( geometryStarType,
+	    // 		    numberOfStars / 6,
+	    // 		    this.radiusInKm,
+	    // 		    this.heightInKm,
+	    // 		    phi,
+	    // 		    maxAngleBranchRadian );
 	    
 	    // Set the star's type material.
 	    let colorStarType = spectralTypeToColor[spectralType];
@@ -217,8 +223,11 @@ function Galaxy(scene,
 	if ( negative ) {
 	    R = -R;
 	}
-	let startGreaterDispersionRad = maxAngleRadian - Math.PI / 2;
+	let startGreaterDispersionRad = 0.7 * maxAngleRadian;
 	let startLessStarsRatio = 0.5;
+	let minTheta = 0.01;
+	let radiusMinTheta = R / ( 1 - T * Math.log( minTheta / phi ) );
+	let r;
 
 	// Place stars on the spiral branch
 	for (let i = 0 ; i < numberOfStars ; ++i) {
@@ -227,23 +236,21 @@ function Galaxy(scene,
 	    
 	    // Generate random position in spiral in polar coordinates.
 	    let theta = randomLessInEnd( startLessStarsRatio ) * maxAngleRadian;
-	    let dispersion;
+	    let dispersion = 8 * ly;
+
+	    if ( theta > startGreaterDispersionRad ) {
+	    	dispersion += dispersion *
+	    	    Math.pow( theta - startGreaterDispersionRad, 2 );
+	    }
 	    
-	    if ( theta < startGreaterDispersionRad ) {
-	    	dispersion = 10 * ly;
-	    }
-	    else {
-	    	dispersion = 10 * ly + 10 * ly *
-	    	    Math.pow( ( theta - ( maxAngleRadian - Math.PI / 2 ) ), 2 );
-	    }
-	    let r = R / ( 1 - T * Math.log( theta / phi ) );
+	    r = R / ( 1 - phi * Math.tan( phi ) * Math.log( theta / phi ) );
 	    r += randomGauss( 0, 1 ) * dispersion;
-	    
+
 	    // Converts into cartesian coordinates.
 	    starVertex.x = r * Math.cos( theta );
 	    starVertex.z = r * Math.sin( theta );
 	    starVertex.y = randomGauss( 0, height );
-	    
+		
 	    // And finally pushes the vertex
 	    geometry.vertices.push( starVertex );
 	    
