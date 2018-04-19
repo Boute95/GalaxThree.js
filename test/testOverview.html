@@ -10,7 +10,8 @@
 	<meta charset=utf-8>
 	<title>My first three.js app</title>
 	<style>
-	 body { margin: 0; overflow: hidden}
+	 body { margin: 0; overflow: hidden }
+	 img { display: none }
 	</style>
     </head>
 
@@ -18,6 +19,7 @@
     <body>
 	
 	<canvas id="myCanvas"></canvas>
+	<img id="shape" src="../resources/testmap.png"/>
 
 	<script src="../js/lib/stats.min.js"></script>
 	<script src="../js/lib/dat.gui.min.js"></script>
@@ -29,7 +31,7 @@
 	<script src="../js/lib/ShaderPass.js"></script>
 	<script src="../js/lib/LuminosityHighPassShader.js"></script>
 	<script src="../js/lib/UnrealBloomPass.js"></script>
-	<script src="../js/lib/GalaxThree.js"></script>
+	<script src="../js/GalaxThree.js"></script>
 	
 	<script>
 
@@ -88,15 +90,13 @@
 	     scene = new THREE.Scene();
 
 	     // Galaxy
-	     galaxy = new Galaxy(scene,
+	     let img = document.getElementById( "shape" );
+             galaxy = new Galaxy(scene,
 				 "../resources/particle1.png",
+				 img,
 				 radiusGalaxyInLy,
 				 5,
-				 5e4,
-				 0.6,
-				 1 * Math.PI,
-				 0.15 );
-				 	      
+				 5e4 );
 
 	     // Monitoring
 	     statsFPS = new Stats();

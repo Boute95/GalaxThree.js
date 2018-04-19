@@ -46,12 +46,10 @@ var spectralTypeToColor = {
  */ 
 function Galaxy(scene,
 		starImagePath,
+		img,
 		radiusInLy = 200,
 		heightInLy = 5,
-		numberOfStars = 1e6,
-		phi = 0.4,
-		maxAngleBranchRadian = 2 * Math.PI,
-	       coreRadiusCoef = 0.25 ) {
+		numberOfStars = 1e6 ) {
     
     this.radiusInKm = radiusInLy * ly;
     this.heightInKm = heightInLy * ly;
@@ -106,6 +104,11 @@ function Galaxy(scene,
 	    arraySpectralTypes = category.spectralTypes;
 	}
 
+	// Get the shape of the galaxy from a grey-scale map and put it
+	// in an array of pixels.
+	let imgDataArray = getImgDataArray( img );
+	writeConsole( imgDataArray.data.length );
+	
 	// Generate stars for each spectralType of the category.
 	for ( let spectralType of arraySpectralTypes ) {
 
@@ -115,11 +118,10 @@ function Galaxy(scene,
 	    // 		     numberOfStars / 6,
 	    // 		     this.radiusInKm * coreRadiusCoef );
 	    generateSpiral( geometryStarType,
-	    		    4 * numberOfStars / 6,
-	    		    this.radiusInKm,
-	    		    this.heightInKm,
-	    		    phi,
-	    		    maxAngleBranchRadian );
+	    		    numberOfStars,
+			    img,
+			    this.radiusInKm );
+	    
 	    // generateSpiral( geometryStarType,
 	    // 		    numberOfStars / 6,
 	    // 		    this.radiusInKm,
@@ -175,88 +177,13 @@ function Galaxy(scene,
     //////////////////////////////////////////////////////////////////////
     function generateSpiral( geometry,
 			     numberOfStars,
-			     radiusInKm,
-			     height,
-			     phi,
-			     maxAngleRadian ) {
-	
-	placeVerticesInSpiral( geometry,
-			       numberOfStars / 2,
-			       radiusInKm,
-			       height,
-			       phi,
-			       maxAngleRadian,
-			       true );
-	placeVerticesInSpiral( geometry,
-			       numberOfStars / 2,
-			       radiusInKm,
-			       height,
-			       phi,
-			       maxAngleRadian,
-			       false );
-	
+			     img,
+			     radiusInKm ) {
+
+
 	
     }
 
-
-    //////////////////////////////////////////////////////////////////////
-    function placeVerticesInSpiral( geometry,
-				    numberOfStars,
-				    radius,
-				    height,
-				    phi,
-				    maxAngleRadian,
-				    negative ) {
-	
-	
-	/////////////////////////////////////////////////////////////////
-	// Logarithmic spiral :					       //
-	// r = R / ( 1 - phi * tan( phi ) * log ( theta/phi ) )	       //
-	/////////////////////////////////////////////////////////////////
-	/*
-	 * For more information about this formula, consult this article :
-	 * https://arxiv.org/pdf/0908.0892.pdf
-	 */
-	
-	let T = phi * Math.tan( phi ); //<  Pre-calculate phi * tan ( phi ) 
-	let R = radius * ( 1 - T * Math.log( maxAngleRadian / phi ) );
-	if ( negative ) {
-	    R = -R;
-	}
-	let startGreaterDispersionRad = 0.7 * maxAngleRadian;
-	let startLessStarsRatio = 0.5;
-	let minTheta = 0.01;
-	let radiusMinTheta = R / ( 1 - T * Math.log( minTheta / phi ) );
-	let r;
-
-	// Place stars on the spiral branch
-	for (let i = 0 ; i < numberOfStars ; ++i) {
-	    
-	    let starVertex = new THREE.Vector3();
-	    
-	    // Generate random position in spiral in polar coordinates.
-	    let theta = randomLessInEnd( startLessStarsRatio ) * maxAngleRadian;
-	    let dispersion = 8 * ly;
-
-	    if ( theta > startGreaterDispersionRad ) {
-	    	dispersion += dispersion *
-	    	    Math.pow( theta - startGreaterDispersionRad, 2 );
-	    }
-	    
-	    r = R / ( 1 - phi * Math.tan( phi ) * Math.log( theta / phi ) );
-	    r += randomGauss( 0, 1 ) * dispersion;
-
-	    // Converts into cartesian coordinates.
-	    starVertex.x = r * Math.cos( theta );
-	    starVertex.z = r * Math.sin( theta );
-	    starVertex.y = randomGauss( 0, height );
-		
-	    // And finally pushes the vertex
-	    geometry.vertices.push( starVertex );
-	    
-	}
-
-    }
 	
 } // end function Galaxy() { }
 
@@ -267,6 +194,7 @@ function Galaxy(scene,
 /////////////////////
 // Other functions //
 ////////////////////////////////////////////////////////////////////////////////
+
 /**
  * Generate a random number with normal distribution N(mu, sigma) 
  */
@@ -303,6 +231,23 @@ function randomLessInEnd( beginDecrease ) {
     
     return u;
 }
+
+
+
+function getImgDataArray( img ) {
+
+    let data = new Object();
+    //img.setAttribute( 'crossOrigin', 'anonymous' );
+    let canvas = document.createElement( "canvas" );
+    canvas.width = img.width;
+    canvas.height = img.height;
+    let ctx = canvas.getContext( "2d" );
+    ctx.drawImage(img, 0, 0);
+    data = ctx.getImageData( 0, 0, img.width, img.height );
+    return data;
+    
+}
+
 
 
 function writeConsole(string) {
