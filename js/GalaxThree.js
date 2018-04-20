@@ -81,10 +81,11 @@ function Galaxy(scene,
     // Generates the two branches of the galaxy's spiral
     let starTexture = new THREE.TextureLoader().load( starImagePath );
 
-    // Get the shape of the galaxy from a grey-scale map and put it
-    // in an array of pixels.
-    let nbOfPixelsByColor = getCountByColorArray( img );
-    
+    // Parses the shape map.
+    let imgData = getImgDataArray( img );
+    let starCountPerColorUnit = getStarCountPerColorUnit( imgData, numberOfStars );
+    let pixelSizeInWorldCoord = this.radiusInKm / img.width;
+
     // For each category of stars ...
     for ( let category of this.arrayStarCategories ) {
 
@@ -113,21 +114,12 @@ function Galaxy(scene,
 
 	    // Places the stars.
 	    let geometryStarType = new THREE.Geometry();
-	    // generateCluster( geometryStarType,
-	    // 		     numberOfStars / 6,
-	    // 		     this.radiusInKm * coreRadiusCoef );
-	    generateSpiral( geometryStarType,
-	    		    numberOfStars,
-			    img,
-			    this.radiusInKm );
-	    
-	    // generateSpiral( geometryStarType,
-	    // 		    numberOfStars / 6,
-	    // 		    this.radiusInKm,
-	    // 		    this.heightInKm,
-	    // 		    phi,
-	    // 		    maxAngleBranchRadian );
-	    
+	    placeStarsWithShape( geometryStarType,
+	    			 numberOfStars,
+				 imgData,
+				 starCountPerColorUnit,
+				 pixelSizeInWorldCoord );
+	    	    
 	    // Set the star's type material.
 	    let colorStarType = spectralTypeToColor[spectralType];
 	    let materialStarType = new THREE.PointsMaterial( {
@@ -174,33 +166,47 @@ function Galaxy(scene,
 
 
     //////////////////////////////////////////////////////////////////////
-    function generateSpiral( geometry,
-			     numberOfStars,
-			     img,
-			     radiusInKm ) {
+    function placeStarsWithShape( geometry,
+				  numberOfStars,
+				  imgData,
+				  starCountPerColorUnit,
+				  pixelSizeInWorldCoord ) {
 
+	// For each pixel of the shape image
+	for ( let i = 0 ; i < imgData.data.length ; i+=4 ) {
 
+	    let pixelStarCount = starCountPerColorUnit * imgData.data[i];
+	    let pixelX = ( i / 4 ) % img.width;
+	    let pixelY = Math.floor( ( i / 4 ) / img.width );
+	    let worldXMin = pixelX * pixelSizeInWorldCoord - pixelSizeInWorldCoord / 2;
+	    let worldXMax = pixelX * pixelSizeInWorldCoord + pixelSizeInWorldCoord / 2;
+	    let worldZMin = pixelY * pixelSizeInWorldCoord - pixelSizeInWorldCoord / 2;
+	    let worldZMax = pixelY * pixelSizeInWorldCoord + pixelSizeInWorldCoord / 2;
+	    
+	    for ( let j = 0 ; j < pixelStarCount ; ++j ) {
+		let starVertex = new THREE.Vector3();
+		starVertex.x = randomUniform( worldXMin, worldXMax );
+		starVertex.z = randomUniform( worldZMin, worldZMax );
+		geometry.vertices.push( starVertex );
+	    }
+	    
+	} // end for each pixel
 	
     }
 
 
 
     //////////////////////////////////////////////////////////////////////
-    function getCountByColorArray( img ) {
+    function getStarCountPerColorUnit( imgData, nbOfStars ) {
 	
-	let imgData = getImgDataArray( img );
-	let nbOfPixelsByColor = new Array();
+	let S = 0; //< Sum color values.
 
-	// Initialize array with 0.
-	for ( let i = 0 ; i <= 255 ; ++i ) {
-	    nbOfPixelsByColor[i] = 0;
-	}
-
-	// Counts pixels depending of their color.
 	for ( let i = 0 ; i < imgData.data.length ; i+=4 ) {
-	    nbOfPixelsByColor[ imgData.data[i] ] += 1;
+	    S += imgData.data[i];
 	}
-
+	
+	return numberOfStars / S;
+	
     }
 
 	
@@ -213,6 +219,11 @@ function Galaxy(scene,
 /////////////////////
 // Other functions //
 ////////////////////////////////////////////////////////////////////////////////
+
+function randomUniform( min = 0, max = 1 ) {
+    return Math.random() * ( max - min ) + min;
+}
+
 
 /**
  * Generate a random number with normal distribution N(mu, sigma) 
