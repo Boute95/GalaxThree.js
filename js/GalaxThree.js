@@ -80,6 +80,10 @@ function Galaxy(scene,
 
     // Generates the two branches of the galaxy's spiral
     let starTexture = new THREE.TextureLoader().load( starImagePath );
+
+    // Get the shape of the galaxy from a grey-scale map and put it
+    // in an array of pixels.
+    let nbOfPixelsByColor = getCountByColorArray( img );
     
     // For each category of stars ...
     for ( let category of this.arrayStarCategories ) {
@@ -104,11 +108,6 @@ function Galaxy(scene,
 	    arraySpectralTypes = category.spectralTypes;
 	}
 
-	// Get the shape of the galaxy from a grey-scale map and put it
-	// in an array of pixels.
-	let imgDataArray = getImgDataArray( img );
-	writeConsole( imgDataArray.data.length );
-	
 	// Generate stars for each spectralType of the category.
 	for ( let spectralType of arraySpectralTypes ) {
 
@@ -182,6 +181,26 @@ function Galaxy(scene,
 
 
 	
+    }
+
+
+
+    //////////////////////////////////////////////////////////////////////
+    function getCountByColorArray( img ) {
+	
+	let imgData = getImgDataArray( img );
+	let nbOfPixelsByColor = new Array();
+
+	// Initialize array with 0.
+	for ( let i = 0 ; i <= 255 ; ++i ) {
+	    nbOfPixelsByColor[i] = 0;
+	}
+
+	// Counts pixels depending of their color.
+	for ( let i = 0 ; i < imgData.data.length ; i+=4 ) {
+	    nbOfPixelsByColor[ imgData.data[i] ] += 1;
+	}
+
     }
 
 	
