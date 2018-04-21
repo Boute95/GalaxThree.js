@@ -19,7 +19,7 @@
     <body>
 	
 	<canvas id="myCanvas"></canvas>
-	<img id="shape" src="../resources/testmap.png"/>
+	<img id="shape" src="../resources/milkywaymap.png"/>
 
 	<script src="../js/lib/stats.min.js"></script>
 	<script src="../js/lib/dat.gui.min.js"></script>
@@ -40,8 +40,8 @@
 	 //////////////////////////////
 
 	 // Variables
-	 const radiusGalaxyInLy = 300; //< In light years.
-	 const farViewInLy = 1000;
+	 const radiusGalaxyInLy = 5e4; //< In light years.
+	 const farViewInLy = 1e7;
 	 var statsFPS, gui, myCanvas;
 	 var bloomPass, composer, renderer, camera, controls, scene, galaxy;
 	 var params = {
@@ -76,7 +76,7 @@
 	     // Camera
 	     camera = new THREE.PerspectiveCamera(
 		 50, myCanvas.width / myCanvas.height, 10, farViewInLy * ly );
-	     camera.position.y = 600 * ly;
+	     camera.position.y = radiusGalaxyInLy * ly;
 	     camera.rotation.z = Math.PI;
 	     camera.updateProjectionMatrix();
 	     
@@ -84,7 +84,7 @@
 	     controls = new THREE.OrbitControls(camera, myCanvas);
 	     controls.enableDamping = true;
 	     controls.minDistance = ly;
-	     controls.maxDistance = 600 * ly;
+	     controls.maxDistance = 2 * radiusGalaxyInLy * ly;
 	     
 	     // Scene
 	     scene = new THREE.Scene();
@@ -95,8 +95,8 @@
 				 "../resources/particle1.png",
 				 img,
 				 radiusGalaxyInLy,
-				 5,
-				 5e4 );
+				 radiusGalaxyInLy / 50,
+				 2e6 );
 
 	     // Monitoring
 	     statsFPS = new Stats();

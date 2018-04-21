@@ -50,7 +50,8 @@ function Galaxy(scene,
 		radiusInLy = 200,
 		heightInLy = 5,
 		numberOfStars = 1e6 ) {
-    
+
+    this.counterStars = 0;
     this.radiusInKm = radiusInLy * ly;
     this.heightInKm = heightInLy * ly;
     this.arrayStarCategories = [
@@ -76,67 +77,100 @@ function Galaxy(scene,
 			 300.0,   600000.0,   0.000001),
     ];
 
-    writeConsole("Number of stars : " + numberOfStars);
-
-    // Generates the two branches of the galaxy's spiral
+    // Loads the star's texture
     let starTexture = new THREE.TextureLoader().load( starImagePath );
+
+    // Array of arrays of geometry and materials.
+    let geoAndMaterialsOfCategories = [ ];
+
+    // Creates geometries and materials according to categories and their
+    // spectral types.
+    for ( let i = 0 ; i < this.arrayStarCategories.length ; ++i ) {
+
+	let category = this.arrayStarCategories[i];
+	geoAndMaterialsOfCategories.push( new Array() );
+
+	for ( let spectralType of category.spectralTypes ) {
+
+	    geoAndMaterialsOfCategories[i].push( {
+		
+		geometry : new THREE.Geometry(),
+		
+		material : new THREE.PointsMaterial( {
+		    color: spectralTypeToColor[ spectralType ],
+		    map: starTexture,
+		    size: Math.pow( category.luminosity, 1/3.2 ) * 1e11,
+		    blending: THREE.AdditiveBlending,
+		    transparent: true, } ) } );
+	    	
+	} // end for each spectral type of the category.
+	
+    } // end for each category.
 
     // Parses the shape map.
     let imgData = getImgDataArray( img );
-    let starCountPerColorUnit = getStarCountPerColorUnit( imgData, numberOfStars );
+    let nbOfStarsForAWhitePixel = getNbOfStarsWhitePixel( imgData, numberOfStars );
+    writeConsole ( nbOfStarsForAWhitePixel );
     let pixelSizeInWorldCoord = this.radiusInKm / img.width;
 
-    // For each category of stars ...
-    for ( let category of this.arrayStarCategories ) {
+    // For each pixel of the map.
+    for ( let i = 0 ; i < imgData.data.length ; i += 4 ) {
 
-	// Counts number of stars for the category.
-    	let nbOfStarsCategory = Math.round( category.proba * numberOfStars );
-	writeConsole( nbOfStarsCategory + " stars for the category " +
-		      category["name"] );
+	let nbOfStarsForThisPixel = nbOfStarsForAWhitePixel * ( imgData.data[i] / 255 );
+	let pixelX = ( i / 4 ) % img.width;
+	let pixelY = Math.floor( ( i / 4 ) / img.width );
+	let worldXMin = pixelX * pixelSizeInWorldCoord - pixelSizeInWorldCoord / 2;
+	let worldXMax = pixelX * pixelSizeInWorldCoord + pixelSizeInWorldCoord / 2;
+	let worldZMin = pixelY * pixelSizeInWorldCoord - pixelSizeInWorldCoord / 2;
+	let worldZMax = pixelY * pixelSizeInWorldCoord + pixelSizeInWorldCoord / 2;
 
-	// Take the different spectral types of the category.
-	let arraySpectralTypes;
-	if ( category.spectralTypes.length > 1 &&
-	     category.spectralTypes < nbOfStarsCategory ) {
-	    let tmp_spectralTypes = category.spectralTypes.slice();
-	    for ( let i = 0 ; i < nbOfStarsCategory ; ++i ) {
-		let index = Math.random() * tmp_spectralTypes.length;
-		arraySpectralTypes.push( tmp_spectralTypes );
-		tmp_spectralTypes.splice( index, 1 );
+	for ( let starNb = 0 ; starNb < nbOfStarsForThisPixel ; ++starNb ) {
+	    
+	    let a = Math.random(); //< Determines which star category to select
+	    let sumProba = 0;
+	    let categoryIndex = 0;
+	    let starPlaced = false;
+
+	    while ( !starPlaced && categoryIndex < this.arrayStarCategories.length ) {
+
+		let category = this.arrayStarCategories[ categoryIndex ];
+		sumProba += category.proba;
+		    
+		if ( a < sumProba ) {
+
+		    let starVertex = new THREE.Vector3();
+		    starVertex.x = randomUniform( worldXMin, worldXMax );
+		    starVertex.z = randomUniform( worldZMin, worldZMax );
+
+		    let whichSpecType =
+			Math.floor( randomUniform( 0, category.spectralTypes.length ) );
+		    geoAndMaterialsOfCategories
+		    [ categoryIndex ]
+		    [ whichSpecType ]
+		    [ "geometry" ].vertices.push( starVertex );
+
+		    this.counterStars += 1;
+		    starPlaced = true;
+		}
+
+		++categoryIndex;
+		
+	    } // end for each category.
+
+	} // end for each star of this pixel.
+	
+    } // end for each pixel of the map.
+
+    writeConsole( "Number of stars : " + this.counterStars );
+
+    for ( let category of geoAndMaterialsOfCategories ) {
+	for ( let geoAndMat of category ) {
+	    if ( geoAndMat["geometry"].vertices.length > 0 ) {
+		let mesh = new THREE.Points( geoAndMat["geometry"], geoAndMat["material"] );
+		scene.add( mesh );
 	    }
 	}
-	else {
-	    arraySpectralTypes = category.spectralTypes;
-	}
-
-	// Generate stars for each spectralType of the category.
-	for ( let spectralType of arraySpectralTypes ) {
-
-	    // Places the stars.
-	    let geometryStarType = new THREE.Geometry();
-	    placeStarsWithShape( geometryStarType,
-	    			 numberOfStars,
-				 imgData,
-				 starCountPerColorUnit,
-				 pixelSizeInWorldCoord );
-	    	    
-	    // Set the star's type material.
-	    let colorStarType = spectralTypeToColor[spectralType];
-	    let materialStarType = new THREE.PointsMaterial( {
-		color: colorStarType,
-		map: starTexture,
-		size: Math.pow( category.luminosity, 1/3.2 ) * 1e11,
-		blending: THREE.AdditiveBlending,
-		transparent: true, } );
-
-	    // Put all the stars of the type into a Points object.
-	    let starsType = new THREE.Points(
-		geometryStarType, materialStarType );
-	    scene.add( starsType );
-
-	} // end for ( spectralType of arraySpectralTypes )
-	
-    } // end for ( category of arrayStarCategories )
+    }
 
 
 
@@ -167,15 +201,19 @@ function Galaxy(scene,
 
     //////////////////////////////////////////////////////////////////////
     function placeStarsWithShape( geometry,
-				  numberOfStars,
+				  categoryProba,
+				  heightInKm,
 				  imgData,
-				  starCountPerColorUnit,
-				  pixelSizeInWorldCoord ) {
+				  pixelSizeInWorldCoord,
+				  starCountPerPixel ) {
+
+	let counterStars = 0;
 
 	// For each pixel of the shape image
 	for ( let i = 0 ; i < imgData.data.length ; i+=4 ) {
 
-	    let pixelStarCount = starCountPerColorUnit * imgData.data[i];
+	    let probaFromColor = imgData.data[i] / 255;
+	    let probaPixel = probaFromColor * categoryProba;
 	    let pixelX = ( i / 4 ) % img.width;
 	    let pixelY = Math.floor( ( i / 4 ) / img.width );
 	    let worldXMin = pixelX * pixelSizeInWorldCoord - pixelSizeInWorldCoord / 2;
@@ -183,29 +221,34 @@ function Galaxy(scene,
 	    let worldZMin = pixelY * pixelSizeInWorldCoord - pixelSizeInWorldCoord / 2;
 	    let worldZMax = pixelY * pixelSizeInWorldCoord + pixelSizeInWorldCoord / 2;
 	    
-	    for ( let j = 0 ; j < pixelStarCount ; ++j ) {
-		let starVertex = new THREE.Vector3();
-		starVertex.x = randomUniform( worldXMin, worldXMax );
-		starVertex.z = randomUniform( worldZMin, worldZMax );
-		geometry.vertices.push( starVertex );
+	    for ( let j = 0 ; j < starCountPerPixel ; ++j ) {
+		let p = Math.random();
+		if ( p < probaPixel ) {
+		    let starVertex = new THREE.Vector3();
+		    starVertex.x = randomUniform( worldXMin, worldXMax );
+		    starVertex.z = randomUniform( worldZMin, worldZMax );
+		    starVertex.y = randomGauss( 0, heightInKm / 3 );
+		    geometry.vertices.push( starVertex );
+		    ++counterStars;
+		}
 	    }
 	    
 	} // end for each pixel
+
+	return counterStars
 	
     }
 
 
 
     //////////////////////////////////////////////////////////////////////
-    function getStarCountPerColorUnit( imgData, nbOfStars ) {
-	
-	let S = 0; //< Sum color values.
+    function getNbOfStarsWhitePixel( imgData, nbOfStars ) {
 
+	let S = 0;
 	for ( let i = 0 ; i < imgData.data.length ; i+=4 ) {
 	    S += imgData.data[i];
 	}
-	
-	return numberOfStars / S;
+	return ( nbOfStars / S ) * 255;
 	
     }
 
