@@ -19,17 +19,17 @@
 	
 	<canvas id="myCanvas"></canvas>
 
-	<script src="js/stats.min.js"></script>
-	<script src="js/dat.gui.min.js"></script>
-	<script src="js/three.min.js"></script>
-	<script src="js/OrbitControls.js"></script>	
-	<script src="js/EffectComposer.js"></script>
-	<script src="js/CopyShader.js"></script> 
-	<script src="js/RenderPass.js"></script>
-	<script src="js/ShaderPass.js"></script>
-	<script src="js/LuminosityHighPassShader.js"></script>
-	<script src="js/UnrealBloomPass.js"></script>
-	<script src="js/GalaxThree.js"></script>
+	<script src="js/lib/stats.min.js"></script>
+	<script src="js/lib/dat.gui.min.js"></script>
+	<script src="js/lib/three.min.js"></script>
+	<script src="js/lib/OrbitControls.js"></script>	
+	<script src="js/lib/EffectComposer.js"></script>
+	<script src="js/lib/CopyShader.js"></script> 
+	<script src="js/lib/RenderPass.js"></script>
+	<script src="js/lib/ShaderPass.js"></script>
+	<script src="js/lib/LuminosityHighPassShader.js"></script>
+	<script src="js/lib/UnrealBloomPass.js"></script>
+	<script src="js/lib/GalaxThree.js"></script>
 	
 	<script>
 
@@ -38,10 +38,10 @@
 	 //////////////////////////////
 
 	 // Variables
-	 const radiusUniverseInLy = 400; //< In light years.
+	 const radiusGalaxyInLy = 400; //< In light years.
 	 const farViewInLy = 1000;
 	 var statsFPS, gui, myCanvas;
-	 var bloomPass, composer, renderer, camera, controls, scene, universe;
+	 var bloomPass, composer, renderer, camera, controls, scene, galaxy;
 	 var params = {
 	     projection: 'normal',
 	     background: false,
@@ -84,10 +84,10 @@
 	     // Scene
 	     scene = new THREE.Scene();
 
-	     // Universe
-	     universe = new Universe(scene,
-				     "resources/particle1.png",
-				     radiusUniverseInLy);
+	     // Galaxy
+	     galaxy = new Galaxy(scene,
+				 "resources/particle1.png",
+				 radiusGalaxyInLy);
 
 	     // Monitoring
 	     statsFPS = new Stats();

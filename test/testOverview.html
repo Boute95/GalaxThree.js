@@ -1,0 +1,163 @@
+<!-- This file is part of GalaxThree.js which is released under GPL v3. -->
+
+
+
+<!DOCTYPE html>
+<html>
+
+    
+    <head>
+	<meta charset=utf-8>
+	<title>My first three.js app</title>
+	<style>
+	 body { margin: 0; overflow: hidden }
+	 img { display: none }
+	</style>
+    </head>
+
+    
+    <body>
+	
+	<canvas id="myCanvas"></canvas>
+	<img id="shape" src="../resources/ngc1300map.png"/>
+
+	<script src="../js/lib/stats.min.js"></script>
+	<script src="../js/lib/dat.gui.min.js"></script>
+	<script src="../js/lib/three.min.js"></script>
+	<script src="../js/lib/OrbitControls.js"></script>	
+	<script src="../js/lib/EffectComposer.js"></script>
+	<script src="../js/lib/CopyShader.js"></script> 
+	<script src="../js/lib/RenderPass.js"></script>
+	<script src="../js/lib/ShaderPass.js"></script>
+	<script src="../js/lib/LuminosityHighPassShader.js"></script>
+	<script src="../js/lib/UnrealBloomPass.js"></script>
+	<script src="../js/GalaxThree.js"></script>
+	
+	<script>
+
+	 //////////////////////////////////////////////////////////////////////
+	 // We suppose 1 unit = 1 km //
+	 //////////////////////////////
+
+	 // Variables
+	 const radiusGalaxyInLy = 5e4; //< In light years.
+	 const farViewInLy = 1e7;
+	 var statsFPS, gui, myCanvas;
+	 var bloomPass, composer, renderer, camera, controls, scene, galaxy;
+	 var params = {
+	     projection: 'normal',
+	     background: false,
+	     bloomStrength: 1.0,
+	     bloomThreshold: 0.85,
+	     bloomRadius: 0.4,
+	 };
+	 
+	 init();
+	 initPostProcess();
+	 render();
+
+
+	 
+	 //////////////////////////////////////////////////////////////////////
+	 function init() {
+	     
+	     // Canvas resize
+	     myCanvas = document.getElementById("myCanvas");
+	     myCanvas.width = window.innerWidth;
+	     myCanvas.height = window.innerHeight;
+
+	     // Renderer
+	     renderer = new THREE.WebGLRenderer(
+		 {canvas : myCanvas, antialias: true, logarithmicDepthBuffer: false});
+	     renderer.setClearColor(0x030303);
+	     renderer.setPixelRatio(window.devicePixelRatio);
+	     renderer.setSize(myCanvas.width, myCanvas.height);
+	     
+	     // Camera
+	     camera = new THREE.PerspectiveCamera(
+		 50, myCanvas.width / myCanvas.height, 10, farViewInLy * ly );
+	     camera.position.y = radiusGalaxyInLy * ly;
+	     camera.rotation.z = Math.PI;
+	     camera.updateProjectionMatrix();
+	     
+	     // Controls
+	     controls = new THREE.OrbitControls(camera, myCanvas);
+	     controls.enableDamping = true;
+	     controls.minDistance = ly;
+	     controls.maxDistance = 2 * radiusGalaxyInLy * ly;
+	     
+	     // Scene
+	     scene = new THREE.Scene();
+
+	     // Galaxy
+	     let img = document.getElementById( "shape" );
+             galaxy = new Galaxy(scene,
+				 "../resources/particle1.png",
+				 img,
+				 radiusGalaxyInLy,
+				 radiusGalaxyInLy / 50,
+				 2e6 );
+
+	     // Monitoring
+	     statsFPS = new Stats();
+	     statsFPS.showPanel(0);
+	     document.body.appendChild(statsFPS.dom);
+
+	     // GUI
+	     gui = new dat.GUI();
+	     gui.add( params, 'bloomThreshold', 0.0, 1.0 ).onChange( function ( value ) {
+		 bloomPass.threshold = Number( value );
+	     } );
+	     gui.add( params, 'bloomStrength', 0.0, 10.0 ).onChange( function ( value ) {
+		 bloomPass.strength = Number( value );
+	     } );
+	     gui.add( params, 'bloomRadius', 0.0, 2.0 ).onChange( function ( value ) {
+		 bloomPass.radius = Number( value );
+	     } );
+	     gui.open();
+	     
+	 }
+
+	 
+	 //////////////////////////////////////////////////////////////////////
+	 function render() {
+	     statsFPS.begin();
+	     composer.render();
+	     statsFPS.end();
+	     requestAnimationFrame(render);
+	 }
+
+
+
+	 //////////////////////////////////////////////////////////////////////
+	 function initPostProcess() {
+	     
+	     // Composer
+	     composer = new THREE.EffectComposer(renderer);
+
+	     // Passes post-processing
+	     var renderPass = new THREE.RenderPass(scene, camera);
+	     bloomPass = new THREE.UnrealBloomPass(
+		 new THREE.Vector2(myCanvas.width, myCanvas.height), 1.5, 0.85, 0.4);
+	     composer.addPass(renderPass);
+	     composer.addPass(bloomPass);
+	     bloomPass.renderToScreen = true;
+	     
+	 }
+
+
+	 //////////////////////////////////////////////////////////////////////
+	 // Listener for window size change
+	 window.addEventListener("resize", onWindowResize);
+	 function onWindowResize() {
+	     myCanvas.width = window.innerWidth;
+	     myCanvas.height = window.innerHeight;
+	     camera.aspect = myCanvas.width / myCanvas.height;
+	     camera.updateProjectionMatrix();
+	     renderer.setSize(myCanvas.width, myCanvas.height);
+	 }
+
+
+	</script>
+    </body>
+</html>

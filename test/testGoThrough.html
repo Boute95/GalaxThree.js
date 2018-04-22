@@ -37,10 +37,10 @@
 	 //////////////////////////////
 
 	 // Variables
-	 const radiusUniverseInLy = 400; //< In light years.
+	 const radiusGalaxyInLy = 400; //< In light years.
 	 const farViewInLy = 10000;
 	 var statsFPS, gui, myCanvas;
-	 var bloomPass, composer, renderer, camera, controls, scene, universe;
+	 var bloomPass, composer, renderer, camera, controls, scene, galaxy;
 	 var params = {
 	     projection: 'normal',
 	     background: false,
@@ -73,16 +73,19 @@
 	     // Camera
 	     camera = new THREE.PerspectiveCamera(
 		 50, myCanvas.width / myCanvas.height, 10, farViewInLy * ly);
-	     camera.position.z = radiusUniverseInLy * ly;
+	     camera.position.z = radiusGalaxyInLy * ly;
 	     camera.updateProjectionMatrix();
 	     
 	     // Scene
 	     scene = new THREE.Scene();
 
-	     // Universe
-	     universe = new Universe(scene,
+	     // Galaxy
+	     galaxy = new Galaxy(scene,
 				     "../resources/particle1.png",
-				     radiusUniverseInLy);
+				     radiusGalaxyInLy,
+				     5,
+				     1e4,
+				     0.52 );
 
 	     // Monitoring
 	     statsFPS = new Stats();
@@ -109,8 +112,8 @@
 	 function render() {
 	     statsFPS.begin();
 	     camera.position.z -= 0.2 * ly;
-	     if ( camera.position.z < - radiusUniverseInLy * ly ) {
-		 camera.position.z = radiusUniverseInLy * ly;
+	     if ( camera.position.z < - radiusGalaxyInLy * ly ) {
+		 camera.position.z = radiusGalaxyInLy * ly;
 	     }
 	     composer.render();
 	     statsFPS.end();
