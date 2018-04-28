@@ -16,10 +16,11 @@
     </head>
 
     
-    <body>
+    <body id="body">
 	
 	<canvas id="myCanvas"></canvas>
 	<img id="shape" src="../resources/mw-star-map.png"/>
+	<img id="cloud" src="../resources/mw-cloud-map.png"/>
 
 	<script src="../js/lib/stats.min.js"></script>
 	<script src="../js/lib/dat.gui.min.js"></script>
@@ -90,13 +91,15 @@
 	     scene = new THREE.Scene();
 
 	     // Galaxy
-	     let img = document.getElementById( "shape" );
+	     let imgStarMap = document.getElementById( "shape" );
+	     let imgCloudMap = document.getElementById( "cloud" );
              galaxy = new Galaxy(scene,
 				 "../resources/particle3.png",
-				 img,
+				 imgStarMap,
+				 imgCloudMap,
 				 radiusGalaxyInLy,
 				 radiusGalaxyInLy / 50,
-				 1e6 );
+				 1e5 );
 
 	     // Monitoring
 	     statsFPS = new Stats();

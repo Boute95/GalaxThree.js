@@ -34,7 +34,8 @@ function StarCategory(name, spectralTypes, radius, luminosity, proba) {
  */ 
 function Galaxy(scene,
 		starImagePath,
-		img,
+		imgStarMap,
+		imgCloudMap,
 		radiusInLy = 200,
 		heightInLy = 5,
 		numberOfStars = 1e6 ) {
@@ -91,10 +92,10 @@ function Galaxy(scene,
     // spectral types.
     createGeoAndMaterials( geoAndMaterialsOfCategories );
 
-    generateStarsAccordingToMap( numberOfStars, img );
+    generateStarsAccordingToMap( numberOfStars, imgStarMap );
     writeConsole( "Number of stars : " + this.starCount );
 
-    let nbClouds = generateClouds( 1000, img, scene );
+    let nbClouds = generateClouds( 10000, imgCloudMap, scene );
     writeConsole( "Number of clouds : " + nbClouds );
 
     // Adds stars to the scene.
@@ -106,9 +107,6 @@ function Galaxy(scene,
 	    }
 	}
     }
-
-
-
 
 
 
@@ -131,8 +129,9 @@ function Galaxy(scene,
 			color: self.spectralTypeToColor[ spectralType ],
 			map: starTexture,
 			size: Math.pow( category.luminosity, 0.8 ) * 1e11,
-			blending: THREE.AdditiveBlending,
-			transparent: true, } ) } );
+			//blending: THREE.SubstractiveBlending,
+			transparent: true,
+		    } ) } );
 	    	
 	    } // end for each spectral type of the category.
 	    
@@ -142,7 +141,7 @@ function Galaxy(scene,
 
 
 
-    
+        
     //////////////////////////////////////////////////////////////////////
     function generateStarsAccordingToMap( numberOfStars, img ) {
 					  
@@ -219,76 +218,85 @@ function Galaxy(scene,
 
 
 
-
     
     //////////////////////////////////////////////////////////////////////
     function generateClouds( numberOfCloud, img, scene ) {
 
+	// Takes the data from the image.
 	let imgData = getImgDataArray( img );
-	let probaForAWhitePixel = getProbaForAWhitePixel( imgData, numberOfCloud );
-	writeConsole( "Proba for a white pixel : " + probaForAWhitePixel );
+	let maxCol = getMaxArray( imgData.data );
+
+	// Adjust all color values between 255 and 0 if the max color is not 255.
+	let coef = 255.0 / maxCol;
+	for ( let i = 0 ; i < imgData.data.length ; i += 4 ) {
+	    imgData.data[i] *= coef;
+	}
+	
 	let pixelSizeInWorldCoord = self.radiusInKm / img.width;
 	let cloudPlaced = 0;
 
-	let text1 = new THREE.TextureLoader().load( "../resources/smoke1.png" );
-	
-	let geo = new THREE.Geometry();
-	
-	while ( cloudPlaced < numberOfCloud )  {
-	    
-	    // For each pixel of the map.
-	    for ( let i = 0 ; i < imgData.data.length && cloudPlaced < numberOfCloud ;
-		  i += 4 ) {
+	let textures = [
+	    new THREE.TextureLoader().load( "../resources/smoke1.png" ),
+	    new THREE.TextureLoader().load( "../resources/smoke2.png" ),
+	];
+	let materials = [
+	    new THREE.PointsMaterial( { color: 0x120804,
+					map: textures[0],
+					size: 5e3 * ly,
+					transparent: true,
+					//blending: THREE.NoBlending,
+					//alphaTest: 0.5,
+				      } ),
+	    // new THREE.PointsMaterial( { color: 0x0f0f0f,
+	    // 				map: textures[1],
+	    // 				size: 4e3 * ly,
+	    // 				transparent: true,
+	    // 			      } ),
+	];
+	let geometries = [
+	    new THREE.Geometry(),
+	    new THREE.Geometry(),
+	];
 
-		let probaForThisPixel = probaForAWhitePixel * ( imgData.data[i] / 255 );
-		let a = Math.random();
+	
+	// For each cloud to place.
+	for ( let i = 0 ; i < numberOfCloud ; ++i ) {
+
+	    let cloudIsPlaced = false;
+	    
+	    while ( !cloudIsPlaced ) {
 		
-		if ( a < probaForThisPixel ) {
+		let a = Math.random();
+		let randomPixelIndex = Math.floor( Math.random() * ( imgData.data.length / 4 ) ) * 4 ;
+
+		if ( a < imgData.data[randomPixelIndex] / 255 ) {
 		    
-		    let pixelX = ( i / 4 ) % img.width;
-		    let pixelY = Math.floor( ( i / 4 ) / img.width );
+		    let pixelX = ( randomPixelIndex / 4 ) % img.width;
+		    let pixelY = Math.floor( ( randomPixelIndex / 4 ) / img.width );
 		    let worldX = pixelX * pixelSizeInWorldCoord;
 		    let worldZ = pixelY * pixelSizeInWorldCoord;
 
 		    let pos = new THREE.Vector3( );
 		    pos.x = worldX;
 		    pos.z = worldZ;
-		    geo.vertices.push( pos );
+		    let whichCloudTex = Math.floor( Math.random() * materials.length );
+		    geometries[whichCloudTex].vertices.push( pos );
 		    ++cloudPlaced;
+		    cloudIsPlaced = true;
 		    
 		}
-	    }
+	    } // end while 
+	} // end for
+
+	for( let i = 0 ; i < geometries.length ; ++i ) {
+	    scene.add( new THREE.Points( geometries[i], materials[i] ) );
 	}
-
-	let mat = new THREE.PointsMaterial( { color: 0x100500,
-					      map: text1,
-					      size: 5e3 * ly,
-					      transparent: true,
-					      blending : THREE.AdditiveBlending
-					    } );
-	scene.add( new THREE.Points( geo, mat ) );
-
+	
 	return cloudPlaced;
 	
     } // end function
-    
-
 
     
-    //////////////////////////////////////////////////////////////////////
-    function getProbaForAWhitePixel( imgData, numberOfThing ) {
-
-	let s = 0;
-
-	for ( let i = 0 ; i < imgData.data.length ; i += 4 ) {
-	    s += imgData.data[i];
-	}
-
-	let S = s / 255;
-	writeConsole( "s = " + s + "S = " + S );
-	return S / ( imgData.data.length / 4 ) / numberOfThing;
-	
-    } // end function 
     
 
     //////////////////////////////////////////////////////////////////////
@@ -374,12 +382,36 @@ function getImgDataArray( img ) {
     let data = new Object();
     //img.setAttribute( 'crossOrigin', 'anonymous' );
     let canvas = document.createElement( "canvas" );
+    document.body.appendChild( canvas );
     canvas.width = img.width;
     canvas.height = img.height;
     let ctx = canvas.getContext( "2d" );
     ctx.drawImage(img, 0, 0);
     data = ctx.getImageData( 0, 0, img.width, img.height );
+
+    canvas.parentNode.removeChild( canvas );
+    
     return data;
+    
+}
+
+
+
+function getMaxArray( array ) {
+
+    let max;
+    
+    if ( array.length >= 1 ) {
+	max = array[0];
+    }
+    
+    for ( let i = 1 ; i < array.length ; ++i ) {
+	if ( array[i] > max ) {
+	    max = array[i];
+	}
+    }
+
+    return max;
     
 }
 
