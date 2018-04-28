@@ -48,8 +48,8 @@ function Galaxy(scene,
     this.heightInKm = heightInLy * ly;
     
     this.arrayStarCategories = [
-	new StarCategory("MS_M",["M"],
-			 0.3,     0.01,       0.8),
+	// new StarCategory("MS_M",["M"],
+	// 		 0.3,     0.01,       0.8),
 	new StarCategory("MS_K",["K"],
 			 0.8,     0.2,        0.08),
 	new StarCategory("MS_G",["G"],
@@ -92,8 +92,9 @@ function Galaxy(scene,
     createGeoAndMaterials( geoAndMaterialsOfCategories );
 
     generateStarsAccordingToMap( numberOfStars, img );
-    
     writeConsole( "Number of stars : " + this.starCount );
+
+    generateClouds( numberOfCloud, img );
 
     // Adds stars to the scene.
     for ( let category of geoAndMaterialsOfCategories ) {
@@ -114,7 +115,6 @@ function Galaxy(scene,
     //////////////////////////////////////////////////////////////////////
     function createGeoAndMaterials( arrayGeoAndMaterials ) {
 
-	writeConsole ( self.starCount );
 	for ( let i = 0 ; i < self.arrayStarCategories.length ; ++i ) {
 
 	    let category = self.arrayStarCategories[i];
@@ -178,7 +178,7 @@ function Galaxy(scene,
 			let starVertex = new THREE.Vector3();
 			starVertex.x = randomUniform( worldXMin, worldXMax );
 			starVertex.z = randomUniform( worldZMin, worldZMax );
-			starVertex.y = randomGauss( 0, self.heightInKm ) / 3;
+			starVertex.y = randomGauss( 0, self.heightInKm / 3);
 
 			let whichSpectralType = Math.floor(
 			    randomUniform( 0, category.spectralTypes.length ) );
@@ -217,6 +217,45 @@ function Galaxy(scene,
     } // end function
 
 
+
+
+    
+    //////////////////////////////////////////////////////////////////////
+    function generateClouds( numberOfCloud, img ) {
+
+	let imgData = getImgDataArray( img );
+	let probaForAWhitePixel = getProbaForAWhitePixel( );
+	let pixelSizeInWorldCoord = self.radiusInKm / img.width;
+	let cloudPlaced = 0;
+
+	while ( cloudPlaced < numberOfCloud )  {
+	    
+	    // For each pixel of the map.
+	    for ( let i = 0 ; i < imgData.data.length && cloudPlaced < numberOfCloud ;
+		  i += 4 ) {
+
+		let pixelX = ( i / 4 ) % img.width;
+		let pixelY = Math.floor( ( i / 4 ) / img.width );
+		let worldX = pixelX * pixelSizeInWorldCoord;
+		let worldZ = pixelY * pixelSizeInWorldCoord;
+
+		
+
+	    }
+	    
+	}
+	
+    }
+    
+
+
+    
+    //////////////////////////////////////////////////////////////////////
+    function getProbaForAWhitePixel( ) {
+
+	
+	
+    }
     
 
     //////////////////////////////////////////////////////////////////////

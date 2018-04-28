@@ -19,7 +19,7 @@
     <body>
 	
 	<canvas id="myCanvas"></canvas>
-	<img id="shape" src="../resources/ngc1300map.png"/>
+	<img id="shape" src="../resources/milkywaymap.png"/>
 
 	<script src="../js/lib/stats.min.js"></script>
 	<script src="../js/lib/dat.gui.min.js"></script>
@@ -40,7 +40,7 @@
 	 //////////////////////////////
 
 	 // Variables
-	 const radiusGalaxyInLy = 5e4; //< In light years.
+	 const radiusGalaxyInLy = 1e5; //< In light years.
 	 const farViewInLy = 1e7;
 	 var statsFPS, gui, myCanvas;
 	 var bloomPass, composer, renderer, camera, controls, scene, galaxy;
@@ -92,11 +92,11 @@
 	     // Galaxy
 	     let img = document.getElementById( "shape" );
              galaxy = new Galaxy(scene,
-				 "../resources/particle1.png",
+				 "../resources/particle3.png",
 				 img,
 				 radiusGalaxyInLy,
 				 radiusGalaxyInLy / 50,
-				 2e6 );
+				 1e7 );
 
 	     // Monitoring
 	     statsFPS = new Stats();
