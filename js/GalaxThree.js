@@ -94,7 +94,8 @@ function Galaxy(scene,
     generateStarsAccordingToMap( numberOfStars, img );
     writeConsole( "Number of stars : " + this.starCount );
 
-    generateClouds( numberOfCloud, img );
+    let nbClouds = generateClouds( 1000, img, scene );
+    writeConsole( "Number of clouds : " + nbClouds );
 
     // Adds stars to the scene.
     for ( let category of geoAndMaterialsOfCategories ) {
@@ -221,41 +222,73 @@ function Galaxy(scene,
 
     
     //////////////////////////////////////////////////////////////////////
-    function generateClouds( numberOfCloud, img ) {
+    function generateClouds( numberOfCloud, img, scene ) {
 
 	let imgData = getImgDataArray( img );
-	let probaForAWhitePixel = getProbaForAWhitePixel( );
+	let probaForAWhitePixel = getProbaForAWhitePixel( imgData, numberOfCloud );
+	writeConsole( "Proba for a white pixel : " + probaForAWhitePixel );
 	let pixelSizeInWorldCoord = self.radiusInKm / img.width;
 	let cloudPlaced = 0;
 
+	let text1 = new THREE.TextureLoader().load( "../resources/smoke1.png" );
+	
+	let geo = new THREE.Geometry();
+	
 	while ( cloudPlaced < numberOfCloud )  {
 	    
 	    // For each pixel of the map.
 	    for ( let i = 0 ; i < imgData.data.length && cloudPlaced < numberOfCloud ;
 		  i += 4 ) {
 
-		let pixelX = ( i / 4 ) % img.width;
-		let pixelY = Math.floor( ( i / 4 ) / img.width );
-		let worldX = pixelX * pixelSizeInWorldCoord;
-		let worldZ = pixelY * pixelSizeInWorldCoord;
-
+		let probaForThisPixel = probaForAWhitePixel * ( imgData.data[i] / 255 );
+		let a = Math.random();
 		
+		if ( a < probaForThisPixel ) {
+		    
+		    let pixelX = ( i / 4 ) % img.width;
+		    let pixelY = Math.floor( ( i / 4 ) / img.width );
+		    let worldX = pixelX * pixelSizeInWorldCoord;
+		    let worldZ = pixelY * pixelSizeInWorldCoord;
 
+		    let pos = new THREE.Vector3( );
+		    pos.x = worldX;
+		    pos.z = worldZ;
+		    geo.vertices.push( pos );
+		    ++cloudPlaced;
+		    
+		}
 	    }
-	    
 	}
+
+	let mat = new THREE.PointsMaterial( { color: 0x100500,
+					      map: text1,
+					      size: 5e3 * ly,
+					      transparent: true,
+					      blending : THREE.AdditiveBlending
+					    } );
+	scene.add( new THREE.Points( geo, mat ) );
+
+	return cloudPlaced;
 	
-    }
+    } // end function
     
 
 
     
     //////////////////////////////////////////////////////////////////////
-    function getProbaForAWhitePixel( ) {
+    function getProbaForAWhitePixel( imgData, numberOfThing ) {
 
+	let s = 0;
+
+	for ( let i = 0 ; i < imgData.data.length ; i += 4 ) {
+	    s += imgData.data[i];
+	}
+
+	let S = s / 255;
+	writeConsole( "s = " + s + "S = " + S );
+	return S / ( imgData.data.length / 4 ) / numberOfThing;
 	
-	
-    }
+    } // end function 
     
 
     //////////////////////////////////////////////////////////////////////
