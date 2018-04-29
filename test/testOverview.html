@@ -42,7 +42,7 @@
 
 	 // Variables
 	 const radiusGalaxyInLy = 1e5; //< In light years.
-	 const farViewInLy = 1e7;
+	 const farViewInLy = 2e5;
 	 var statsFPS, gui, myCanvas;
 	 var bloomPass, composer, renderer, camera, controls, scene, galaxy;
 	 var params = {
@@ -76,7 +76,7 @@
 	     
 	     // Camera
 	     camera = new THREE.PerspectiveCamera(
-		 50, myCanvas.width / myCanvas.height, 10, farViewInLy * ly );
+		 50, myCanvas.width / myCanvas.height, 1e3 * ly, farViewInLy * ly );
 	     camera.position.y = radiusGalaxyInLy * ly;
 	     camera.rotation.z = Math.PI;
 	     camera.updateProjectionMatrix();
@@ -99,7 +99,7 @@
 				 imgCloudMap,
 				 radiusGalaxyInLy,
 				 radiusGalaxyInLy / 50,
-				 1e5 );
+				 5e6 );
 
 	     // Monitoring
 	     statsFPS = new Stats();
