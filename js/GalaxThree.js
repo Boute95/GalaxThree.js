@@ -95,9 +95,6 @@ function Galaxy(scene,
     generateStarsAccordingToMap( numberOfStars, imgStarMap );
     writeConsole( "Number of stars : " + this.starCount );
 
-    let nbClouds = generateClouds( 10000, imgCloudMap, scene );
-    writeConsole( "Number of clouds : " + nbClouds );
-
     // Adds stars to the scene.
     for ( let category of geoAndMaterialsOfCategories ) {
 	for ( let geoAndMat of category ) {
@@ -108,6 +105,10 @@ function Galaxy(scene,
 	}
     }
 
+    let nbClouds = generateClouds( 100, imgCloudMap, scene );
+    writeConsole( "Number of clouds : " + nbClouds );
+
+    
 
 
 
@@ -129,7 +130,7 @@ function Galaxy(scene,
 			color: self.spectralTypeToColor[ spectralType ],
 			map: starTexture,
 			size: Math.pow( category.luminosity, 0.8 ) * 1e11,
-			//blending: THREE.SubstractiveBlending,
+			blending: THREE.AdditiveBlending,
 			transparent: true,
 		    } ) } );
 	    	
@@ -239,12 +240,16 @@ function Galaxy(scene,
 	    new THREE.TextureLoader().load( "../resources/smoke1.png" ),
 	    new THREE.TextureLoader().load( "../resources/smoke2.png" ),
 	];
+	
 	let materials = [
-	    new THREE.PointsMaterial( { color: 0x120804,
+	    new THREE.SpriteMaterial( { color: 0x050301,
 					map: textures[0],
-					size: 5e3 * ly,
+//					size: 5e3 * ly,
 					transparent: true,
-					//blending: THREE.NoBlending,
+					//blending: THREE.CustomBlending,
+					// blendEquation: THREE.AddEquation,
+					// blendSrc: THREE.ZeroFactor,
+					// blendDst: THREE.OneMinusSrcAlphaFactor,
 					//alphaTest: 0.5,
 				      } ),
 	    // new THREE.PointsMaterial( { color: 0x0f0f0f,
@@ -253,6 +258,7 @@ function Galaxy(scene,
 	    // 				transparent: true,
 	    // 			      } ),
 	];
+	
 	let geometries = [
 	    new THREE.Geometry(),
 	    new THREE.Geometry(),
@@ -276,11 +282,13 @@ function Galaxy(scene,
 		    let worldX = pixelX * pixelSizeInWorldCoord;
 		    let worldZ = pixelY * pixelSizeInWorldCoord;
 
-		    let pos = new THREE.Vector3( );
-		    pos.x = worldX;
-		    pos.z = worldZ;
+		    let x = worldX;
+		    let z = worldZ;
 		    let whichCloudTex = Math.floor( Math.random() * materials.length );
-		    geometries[whichCloudTex].vertices.push( pos );
+		    let sprite =  new THREE.Sprite( materials[whichCloudTex] );
+		    sprite.position.set ( x, 0, z );
+		    sprite.scale.set( 10000 * ly, 10000 * ly, 1 );
+		    scene.add( sprite );
 		    ++cloudPlaced;
 		    cloudIsPlaced = true;
 		    
@@ -288,9 +296,9 @@ function Galaxy(scene,
 	    } // end while 
 	} // end for
 
-	for( let i = 0 ; i < geometries.length ; ++i ) {
-	    scene.add( new THREE.Points( geometries[i], materials[i] ) );
-	}
+	// for( let i = 0 ; i < geometries.length ; ++i ) {
+	//     scene.add( new THREE.Points( geometries[i], materials[i] ) );
+	// }
 	
 	return cloudPlaced;
 	
