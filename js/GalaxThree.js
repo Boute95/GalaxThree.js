@@ -105,7 +105,7 @@ function Galaxy(scene,
 	}
     }
 
-    let nbClouds = generateClouds( 1e5, imgCloudMap, scene );
+    let nbClouds = generateClouds( 5e3, imgCloudMap, scene );
     writeConsole( "Number of clouds : " + nbClouds );
 
     
@@ -238,18 +238,18 @@ function Galaxy(scene,
 	let cloudPlaced = 0;
 
 	let textures = [
-	    new THREE.TextureLoader().load( "../resources/smoke1.png" ),
-	    new THREE.TextureLoader().load( "../resources/smoke2.png" ),
+	    new THREE.TextureLoader().load( "../resources/black_nebula1.png" ),
+	    new THREE.TextureLoader().load( "../resources/black_nebula2.png" ),
 	];
 	
 	let materials = [
-	    new THREE.PointsMaterial( { color: 0x050301,
+	    new THREE.PointsMaterial( { color: 0x120904,
 					map: textures[0],
-					size: 5e3 * ly,
+					size: 3e3 * ly,
 					transparent: true,
 					depthWrite: false,
 				      } ),
-	    new THREE.PointsMaterial( { color: 0x0f0f0f,
+	    new THREE.PointsMaterial( { color: 0x060503,
 	    				map: textures[1],
 	    				size: 4e3 * ly,
 	    				transparent: true,
