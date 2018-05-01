@@ -42,7 +42,7 @@
 
 	 // Variables
 	 const radiusGalaxyInLy = 1e5; //< In light years.
-	 const farViewInLy = 2e5;
+	 const farViewInLy = 3e5;
 	 var statsFPS, gui, myCanvas;
 	 var bloomPass, composer, renderer, camera, controls, scene, galaxy;
 	 var params = {
@@ -126,6 +126,7 @@
 	 function render() {
 	     statsFPS.begin();
 	     composer.render();
+	     
 	     statsFPS.end();
 	     requestAnimationFrame(render);
 	 }

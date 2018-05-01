@@ -105,8 +105,10 @@ function Galaxy(scene,
 	}
     }
 
-    let nbClouds = generateClouds( 5e3, imgCloudMap, scene );
+    let nbClouds = generateClouds( 1e4, imgCloudMap, scene );
     writeConsole( "Number of clouds : " + nbClouds );
+
+    setGalaxTexture( scene );
 
     
 
@@ -149,8 +151,8 @@ function Galaxy(scene,
 					  
 	let imgData = getImgDataArray( img );
 	let nbOfStarsForAWhitePixel = getNbOfStarsWhitePixel( imgData, numberOfStars );
-	let pixelSizeInWorldCoord = self.radiusInKm / img.width;
-
+	let pixelSizeInWorldCoord = self.radiusInKm * 2 / img.width;
+	
 	// For each pixel of the map.
 	for ( let i = 0 ; i < imgData.data.length ; i += 4 ) {
 
@@ -158,10 +160,14 @@ function Galaxy(scene,
 		nbOfStarsForAWhitePixel * ( imgData.data[i] / 255 );
 	    let pixelX = ( i / 4 ) % img.width;
 	    let pixelY = Math.floor( ( i / 4 ) / img.width );
-	    let worldXMin = pixelX * pixelSizeInWorldCoord - pixelSizeInWorldCoord / 2;
-	    let worldXMax = pixelX * pixelSizeInWorldCoord + pixelSizeInWorldCoord / 2;
-	    let worldZMin = pixelY * pixelSizeInWorldCoord - pixelSizeInWorldCoord / 2;
-	    let worldZMax = pixelY * pixelSizeInWorldCoord + pixelSizeInWorldCoord / 2;
+	    let worldXMin = pixelX * pixelSizeInWorldCoord - pixelSizeInWorldCoord / 2
+		- self.radiusInKm;
+	    let worldXMax = pixelX * pixelSizeInWorldCoord + pixelSizeInWorldCoord / 2
+		- self.radiusInKm;
+	    let worldZMin = pixelY * pixelSizeInWorldCoord - pixelSizeInWorldCoord / 2
+		- self.radiusInKm;
+	    let worldZMax = pixelY * pixelSizeInWorldCoord + pixelSizeInWorldCoord / 2
+		- self.radiusInKm;
 
 	    for ( let starNb = 0 ; starNb < nbOfStarsForThisPixel ; ++starNb ) {
 		
@@ -234,7 +240,7 @@ function Galaxy(scene,
 	    imgData.data[i] *= coef;
 	}
 	
-	let pixelSizeInWorldCoord = self.radiusInKm / img.width;
+	let pixelSizeInWorldCoord = self.radiusInKm * 2 / img.width;
 	let cloudPlaced = 0;
 
 	let textures = [
@@ -278,11 +284,12 @@ function Galaxy(scene,
 		    
 		    let pixelX = ( randomPixelIndex / 4 ) % img.width;
 		    let pixelY = Math.floor( ( randomPixelIndex / 4 ) / img.width );
-		    let worldX = pixelX * pixelSizeInWorldCoord;
-		    let worldZ = pixelY * pixelSizeInWorldCoord;
+		    let worldX = pixelX * pixelSizeInWorldCoord - self.radiusInKm;
+		    let worldZ = pixelY * pixelSizeInWorldCoord - self.radiusInKm;
 
 		    let x = worldX;
 		    let z = worldZ;
+		    let y = randomGauss() * 0.5 * self.heightInKm;
 		    let whichCloudTex = Math.floor( Math.random() * materials.length );
 		    geometries[whichCloudTex].vertices.push( new THREE.Vector3( x, 0, z ) );
 		    ++cloudPlaced;
@@ -301,6 +308,27 @@ function Galaxy(scene,
     } // end function
 
     
+
+
+    //////////////////////////////////////////////////////////////////////
+    function setGalaxTexture( scene ) {
+
+	let geo = new THREE.PlaneBufferGeometry( self.radiusInKm * 2, self.radiusInKm * 2 );
+	let tex = new THREE.TextureLoader().load( "../resources/milkyway.png" );
+	let mat = new THREE.MeshBasicMaterial( { map: tex,
+						 transparent: true,
+						 opacity: 0.05,
+						 side: THREE.DoubleSide,
+						 blending: THREE.AdditiveBlending } );
+	let mesh = new THREE.Mesh( geo, mat );
+	mesh.rotation.x = - Math.PI / 2;
+	//mesh.rotation.z = Math.PI / 2;
+	//mesh.position.set( self.radiusInKm, 0, -self.radiusInKm );
+	scene.add( mesh );
+	
+    }
+
+
     
 
     //////////////////////////////////////////////////////////////////////
