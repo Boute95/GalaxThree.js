@@ -33,6 +33,19 @@
 	<script src="../js/lib/LuminosityHighPassShader.js"></script>
 	<script src="../js/lib/UnrealBloomPass.js"></script>
 	<script src="../js/GalaxThree.js"></script>
+	<script type="x-shader/x-vertex" id="texGalaxVertexShader">
+	 void main() 
+	 {
+	     vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+	     gl_Position = projectionMatrix * modelViewPosition;
+	 }
+	</script>
+	<script type="x-shader/x-fragment" id="texGalaxFragShader">
+	 void main() {
+	     gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+	 }
+	</script>
+	
 	
 	<script>
 
