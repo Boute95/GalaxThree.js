@@ -246,24 +246,35 @@ function Galaxy(scene,
 	let textures = [
 	    new THREE.TextureLoader().load( "../resources/black_nebula1.png" ),
 	    new THREE.TextureLoader().load( "../resources/black_nebula2.png" ),
+	    new THREE.TextureLoader().load( "../resources/black_nebula2.png" ),
 	];
 	
 	let materials = [
 	    new THREE.PointsMaterial( { color: 0x120904,
 					map: textures[0],
-					size: 3e3 * ly,
+					size: 7e3 * ly,
 					transparent: true,
 					depthWrite: false,
+					opacity: 0.3,
 				      } ),
 	    new THREE.PointsMaterial( { color: 0x060503,
 	    				map: textures[1],
-	    				size: 4e3 * ly,
+	    				size: 7e3 * ly,
 	    				transparent: true,
 					depthWrite: false,
+					opacity: 0.3,
+				      } ),
+	    new THREE.PointsMaterial( { color: 0x060503,
+	    				map: textures[2],
+	    				size: 8e3 * ly,
+	    				transparent: true,
+					depthWrite: false,
+					opacity: 0.4,
 				      } ),
 	];
 	
 	let geometries = [
+	    new THREE.Geometry(),
 	    new THREE.Geometry(),
 	    new THREE.Geometry(),
 	];
@@ -289,7 +300,7 @@ function Galaxy(scene,
 
 		    let x = worldX;
 		    let z = worldZ;
-		    let y = randomGauss() * 0.5 * self.heightInKm;
+		    let y = randomGauss() * 0.2 * self.heightInKm;
 		    let whichCloudTex = Math.floor( Math.random() * materials.length );
 		    geometries[whichCloudTex].vertices.push( new THREE.Vector3( x, 0, z ) );
 		    ++cloudPlaced;
@@ -318,7 +329,8 @@ function Galaxy(scene,
 	let mat = new THREE.ShaderMaterial( {
 	    vertexShader: document.getElementById( "texGalaxVertexShader" ).textContent,
 	    fragmentShader: document.getElementById( "texGalaxFragShader" ).textContent,
-	    opacity: 0.2
+	    opacity: 0.2,
+	    visible: false
 	} );
 	// let mat = new THREE.MeshBasicMaterial( { map: tex,
 	// 					 transparent: true,
