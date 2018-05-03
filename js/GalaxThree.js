@@ -327,6 +327,15 @@ function Galaxy(scene,
 	let geo = new THREE.PlaneBufferGeometry( self.radiusInKm * 2, self.radiusInKm * 2 );
 	let tex = new THREE.TextureLoader().load( "../resources/milkyway.png" );
 	let basicShader = THREE.ShaderLib[ 'basic' ];
+
+	// Adds some code in frag shader to reduce opacity when the camera gets closer
+	// to the mesh.
+	let fragShader = basicShader.fragmentShader;
+	let linesFragShader = fragShader.split( '\n' );
+	linesFragShader.splice( 20, 0, 'LOLOLOLOLOL' );
+	writeConsole( linesFragShader.join( '\n' ) );
+	//basicShader.fragmentShader
+	
 	let uniforms = THREE.UniformsUtils.clone( basicShader.uniforms );
 	uniforms[ 'map' ].value = tex;
 	uniforms[ 'opacity' ].value = 0.2;
