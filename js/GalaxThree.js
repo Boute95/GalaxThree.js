@@ -326,21 +326,23 @@ function Galaxy(scene,
 
 	let geo = new THREE.PlaneBufferGeometry( self.radiusInKm * 2, self.radiusInKm * 2 );
 	let tex = new THREE.TextureLoader().load( "../resources/milkyway.png" );
+	let basicShader = THREE.ShaderLib[ 'basic' ];
+	let uniforms = THREE.UniformsUtils.clone( basicShader.uniforms );
+	uniforms[ 'map' ].value = tex;
+	uniforms[ 'opacity' ].value = 0.2;
+	
 	let mat = new THREE.ShaderMaterial( {
-	    vertexShader: document.getElementById( "texGalaxVertexShader" ).textContent,
-	    fragmentShader: document.getElementById( "texGalaxFragShader" ).textContent,
-	    opacity: 0.2,
-	    visible: false
+	    uniforms: uniforms,
+	    vertexShader: basicShader.vertexShader,
+	    fragmentShader: basicShader.fragmentShader,
+	    side: THREE.DoubleSide,
+	    transparent: true,
+	    blending: THREE.AdditiveBlending,
 	} );
-	// let mat = new THREE.MeshBasicMaterial( { map: tex,
-	// 					 transparent: true,
-	// 					 opacity: 0.05,
-	// 					 side: THREE.DoubleSide,
-	// 					 blending: THREE.AdditiveBlending } );
+	mat.map = tex;
+	
 	let mesh = new THREE.Mesh( geo, mat );
 	mesh.rotation.x = - Math.PI / 2;
-	//mesh.rotation.z = Math.PI / 2;
-	//mesh.position.set( self.radiusInKm, 0, -self.radiusInKm );
 	scene.add( mesh );
 	
     }
