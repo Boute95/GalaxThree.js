@@ -328,22 +328,54 @@ function Galaxy(scene,
 	let tex = new THREE.TextureLoader().load( "../resources/milkyway.png" );
 	let basicShader = THREE.ShaderLib[ 'basic' ];
 
-	// Adds some code in frag shader to reduce opacity when the camera gets closer
-	// to the mesh.
-	let fragShader = basicShader.fragmentShader;
-	let linesFragShader = fragShader.split( '\n' );
-	linesFragShader.splice( 20, 0, 'LOLOLOLOLOL' );
-	writeConsole( linesFragShader.join( '\n' ) );
-	//basicShader.fragmentShader
+	let maxOpacityDistance = 100 * ly;
+	let minOpacityDistance = 10 * ly;
+	let cstOpacityFunction = minOpacityDistance / ( minOpacityDistance - maxOpacityDistance );
 	
-	let uniforms = THREE.UniformsUtils.clone( basicShader.uniforms );
+	// Set built-in uniforms and adds some custom one
+	let uniforms = THREE.UniformsUtils.merge( [
+	    THREE.UniformsUtils.clone( basicShader.uniforms ),
+	    { cstOpacityFunction: cstOpacityFunction },
+	    { factorOpacityFunction: - cstOpacityFunction / minOpacityDistance },
+	] );
 	uniforms[ 'map' ].value = tex;
-	uniforms[ 'opacity' ].value = 0.2;
+		
+	// Adds some code in vertex shader to reduce opacity when the camera gets closer
+	// to the mesh.
+	let vertexShader = basicShader.vertexShader;
+	let fragShader = basicShader.fragmentShader;
+	let customLinesBegVertex = [
+	    "uniform float cstOpacityFunction;",
+	    "uniform float factorOpacityFunction;",
+	    "varying float vOpacity;",
+	].join( '\n' );
+	let customLinesVertex = [
+	    "float cameraDistance = length( vec4( cameraPosition, 1) - gl_Position );",
+	    "float vOpacity = factorOpacityFunction * cameraDistance + cstOpacityFunction;",
+	].join( '\n' );
+	let customLinesBegFrag = [
+	    "varying float vOpacity;",
+	].join( '\n' );
+	let customLinesFrag = [
+	    "gl_FragColor = vec4( outgoingLight, vOpacity );"
+	].join( '\n' );
+	
+	let linesVertexShader = vertexShader.split( '\n' );
+	linesVertexShader.splice( 0, 0, customLinesBegVertex );
+	linesVertexShader.splice( 31, 0, customLinesVertex );
+	vertexShader = linesVertexShader.join( '\n' );
+	writeConsole( vertexShader );
+	
+	let linesFragShader = fragShader.split( '\n' );
+	linesFragShader.splice( 0, 0, customLinesBegFrag );
+	linesFragShader.splice( 43, 0, customLinesFrag );
+	fragShader = linesFragShader.join( '\n' );
+	writeConsole( fragShader );
 	
 	let mat = new THREE.ShaderMaterial( {
 	    uniforms: uniforms,
-	    vertexShader: basicShader.vertexShader,
-	    fragmentShader: basicShader.fragmentShader,
+	    vertexShader: vertexShader,
+	    fragmentShader: fragShader,
 	    side: THREE.DoubleSide,
 	    transparent: true,
 	    blending: THREE.AdditiveBlending,
