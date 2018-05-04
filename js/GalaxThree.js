@@ -108,8 +108,13 @@ function Galaxy(scene,
     let nbClouds = generateClouds( 1e4, imgCloudMap, scene );
     writeConsole( "Number of clouds : " + nbClouds );
 
+    this.galaxyPlane;
     setGalaxTexture( scene );
 
+    this.update = function( cameraPosition )  {
+
+    };
+    
     
 
 
@@ -328,15 +333,18 @@ function Galaxy(scene,
 	let tex = new THREE.TextureLoader().load( "../resources/milkyway.png" );
 	let basicShader = THREE.ShaderLib[ 'basic' ];
 
-	let maxOpacityDistance = 100 * ly;
-	let minOpacityDistance = 10 * ly;
+	let maxOpacityDistance = 5e5 * ly;
+	let minOpacityDistance = 1e4 * ly;
 	let cstOpacityFunction = minOpacityDistance / ( minOpacityDistance - maxOpacityDistance );
-	
+	let factorOpacityFunction =  - cstOpacityFunction / minOpacityDistance;
+	let maxOpacity = 0.3;
+		
 	// Set built-in uniforms and adds some custom one
 	let uniforms = THREE.UniformsUtils.merge( [
 	    THREE.UniformsUtils.clone( basicShader.uniforms ),
-	    { cstOpacityFunction: cstOpacityFunction },
-	    { factorOpacityFunction: - cstOpacityFunction / minOpacityDistance },
+	    { cstOpacityFunction: { value: cstOpacityFunction } },
+	    { factorOpacityFunction: { value: factorOpacityFunction } },
+	    { maxOpacity: { value: maxOpacity } },
 	] );
 	uniforms[ 'map' ].value = tex;
 		
@@ -345,19 +353,22 @@ function Galaxy(scene,
 	let vertexShader = basicShader.vertexShader;
 	let fragShader = basicShader.fragmentShader;
 	let customLinesBegVertex = [
-	    "uniform float cstOpacityFunction;",
-	    "uniform float factorOpacityFunction;",
-	    "varying float vOpacity;",
-	].join( '\n' );
+	    "varying vec4 vPosition;",
+	   	].join( '\n' );
 	let customLinesVertex = [
-	    "float cameraDistance = length( vec4( cameraPosition, 1) - gl_Position );",
-	    "float vOpacity = factorOpacityFunction * cameraDistance + cstOpacityFunction;",
+	    "vPosition = gl_Position;"
 	].join( '\n' );
 	let customLinesBegFrag = [
-	    "varying float vOpacity;",
+	    "uniform float cstOpacityFunction;",
+	    "uniform float factorOpacityFunction;",
+	    "uniform float maxOpacity;",
+	    "varying vec4 vPosition;",
 	].join( '\n' );
 	let customLinesFrag = [
-	    "gl_FragColor = vec4( outgoingLight, vOpacity );"
+	    "float cameraDistance = distance( vec4( cameraPosition, 1 ), vPosition );",
+	    "float customOpacity = factorOpacityFunction * cameraDistance + cstOpacityFunction;",
+	    "customOpacity = min( customOpacity, maxOpacity );",
+	    "gl_FragColor = vec4( outgoingLight, customOpacity );"
 	].join( '\n' );
 	
 	let linesVertexShader = vertexShader.split( '\n' );
@@ -382,9 +393,9 @@ function Galaxy(scene,
 	} );
 	mat.map = tex;
 	
-	let mesh = new THREE.Mesh( geo, mat );
-	mesh.rotation.x = - Math.PI / 2;
-	scene.add( mesh );
+	self.galaxyPlane = new THREE.Mesh( geo, mat );
+	self.galaxyPlane.rotation.x = - Math.PI / 2;
+	scene.add( self.galaxyPlane );
 	
     }
 

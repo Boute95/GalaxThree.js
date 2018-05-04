@@ -127,7 +127,7 @@
 	 function render() {
 	     statsFPS.begin();
 	     composer.render();
-	     
+	     galaxy.update( camera.position );
 	     statsFPS.end();
 	     requestAnimationFrame(render);
 	 }
