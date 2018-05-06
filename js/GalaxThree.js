@@ -112,7 +112,8 @@ function Galaxy(scene,
     setGalaxTexture( scene );
 
     this.update = function( cameraPosition )  {
-
+	this.galaxyPlane.worldToLocal( cameraPosition );
+	this.galaxyPlane.material.uniforms[ 'myCamPosition' ].value = cameraPosition;
     };
     
     
@@ -333,11 +334,11 @@ function Galaxy(scene,
 	let tex = new THREE.TextureLoader().load( "../resources/milkyway.png" );
 	let basicShader = THREE.ShaderLib[ 'basic' ];
 
-	let maxOpacityDistance = 5e5 * ly;
+	let maxOpacityDistance = 4e5 * ly;
 	let minOpacityDistance = 1e4 * ly;
 	let cstOpacityFunction = minOpacityDistance / ( minOpacityDistance - maxOpacityDistance );
 	let factorOpacityFunction =  - cstOpacityFunction / minOpacityDistance;
-	let maxOpacity = 0.3;
+	let maxOpacity = 0.4;
 		
 	// Set built-in uniforms and adds some custom one
 	let uniforms = THREE.UniformsUtils.merge( [
@@ -345,6 +346,7 @@ function Galaxy(scene,
 	    { cstOpacityFunction: { value: cstOpacityFunction } },
 	    { factorOpacityFunction: { value: factorOpacityFunction } },
 	    { maxOpacity: { value: maxOpacity } },
+	    { myCamPosition: { value: new THREE.Vector3( 0, 0, 0 ) } },
 	] );
 	uniforms[ 'map' ].value = tex;
 		
@@ -353,19 +355,20 @@ function Galaxy(scene,
 	let vertexShader = basicShader.vertexShader;
 	let fragShader = basicShader.fragmentShader;
 	let customLinesBegVertex = [
-	    "varying vec4 vPosition;",
+	    "varying vec3 vPosition;",
 	   	].join( '\n' );
 	let customLinesVertex = [
-	    "vPosition = gl_Position;"
+	    "vPosition = position;"
 	].join( '\n' );
 	let customLinesBegFrag = [
 	    "uniform float cstOpacityFunction;",
 	    "uniform float factorOpacityFunction;",
 	    "uniform float maxOpacity;",
-	    "varying vec4 vPosition;",
+	    "uniform vec3 myCamPosition;",
+	    "varying vec3 vPosition;",
 	].join( '\n' );
 	let customLinesFrag = [
-	    "float cameraDistance = distance( vec4( cameraPosition, 1 ), vPosition );",
+	    "float cameraDistance = distance( myCamPosition, vPosition );",
 	    "float customOpacity = factorOpacityFunction * cameraDistance + cstOpacityFunction;",
 	    "customOpacity = min( customOpacity, maxOpacity );",
 	    "gl_FragColor = vec4( outgoingLight, customOpacity );"

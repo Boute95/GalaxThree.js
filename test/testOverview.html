@@ -84,7 +84,7 @@
 	     
 	     // Controls
 	     controls = new THREE.OrbitControls(camera, myCanvas);
-	     controls.enableDamping = true;
+	     //controls.enableDamping = true;
 	     controls.minDistance = ly;
 	     controls.maxDistance = 2 * radiusGalaxyInLy * ly;
 	     
@@ -127,7 +127,8 @@
 	 function render() {
 	     statsFPS.begin();
 	     composer.render();
-	     galaxy.update( camera.position );
+	     let v = controls.object.position.clone()
+	     galaxy.update( v );
 	     statsFPS.end();
 	     requestAnimationFrame(render);
 	 }
