@@ -137,7 +137,7 @@ function Galaxy(scene,
 		    material : new THREE.PointsMaterial( {
 			color: self.spectralTypeToColor[ spectralType ],
 			map: starTexture,
-			size: Math.pow( category.luminosity, 0.8 ) * 1e11,
+			size: Math.pow( category.luminosity, 0.8 ) * 1e13,
 			blending: THREE.AdditiveBlending,
 			transparent: true,
 			alphaTest: 0.5,
