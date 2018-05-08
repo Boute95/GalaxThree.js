@@ -32,14 +32,15 @@ function StarCategory(name, spectralTypes, radius, luminosity, proba) {
  * @param starDensity Number of stars per cubic light year.
  * @param positionOfCenter Position of galaxy's center in the world coordinates.
  */ 
-function Galaxy(scene,
-		starImagePath,
-		imgStarMap,
-		imgCloudMap,
-		radiusInLy = 200,
-		heightInLy = 5,
-		numberOfStars = 1e6 ) {
-
+function Galaxy( scene,
+		 starImagePath,
+		 imgStarMap,
+		 imgCloudMap,
+		 numberOfStars = 1e6,
+		 radiusInLy = 1e5,
+		 heightInLy = 3e3,
+		 maxHeightInLy = 15e3 ) {
+		
     let self = this;
     
     this.starCount = 0;
@@ -47,6 +48,10 @@ function Galaxy(scene,
     this.radiusInKm = radiusInLy * ly;
     
     this.heightInKm = heightInLy * ly;
+
+    this.maxHeightInKm = maxHeightInLy * ly;
+
+    this.galaxyPlane;
     
     this.arrayStarCategories = [
 	// new StarCategory("MS_M",["M"],
@@ -108,12 +113,22 @@ function Galaxy(scene,
     let nbClouds = generateClouds( 1e4, imgCloudMap, scene );
     writeConsole( "Number of clouds : " + nbClouds );
 
-    this.galaxyPlane;
     setGalaxTexture( scene );
 
+
+
+    
     this.update = function( cameraPosition )  {
+
+	// update the cam position to the plane's uniform.
 	this.galaxyPlane.worldToLocal( cameraPosition );
 	this.galaxyPlane.material.uniforms[ 'myCamPosition' ].value = cameraPosition;
+
+	// calculate plane's normal vector
+	let v1;
+	// reduce the plane's opacity when the camera sees the its side.
+	
+	
     };
     
     
@@ -137,7 +152,7 @@ function Galaxy(scene,
 		    material : new THREE.PointsMaterial( {
 			color: self.spectralTypeToColor[ spectralType ],
 			map: starTexture,
-			size: Math.pow( category.luminosity, 0.8 ) * 1e13,
+			size: 1e14,//Math.pow( category.luminosity, 0.8 ) * 1e13,
 			blending: THREE.AdditiveBlending,
 			transparent: true,
 			alphaTest: 0.5,
@@ -174,6 +189,8 @@ function Galaxy(scene,
 		- self.radiusInKm;
 	    let worldZMax = pixelY * pixelSizeInWorldCoord + pixelSizeInWorldCoord / 2
 		- self.radiusInKm;
+	    let height = self.heightInKm + imgData.data[i + 1] / 255
+		* ( self.maxHeightInKm - self.heightInKm );
 
 	    for ( let starNb = 0 ; starNb < nbOfStarsForThisPixel ; ++starNb ) {
 		
@@ -192,7 +209,7 @@ function Galaxy(scene,
 			let starVertex = new THREE.Vector3();
 			starVertex.x = randomUniform( worldXMin, worldXMax );
 			starVertex.z = randomUniform( worldZMin, worldZMax );
-			starVertex.y = randomGauss( 0, self.heightInKm / 3);
+			starVertex.y = randomGauss( 0, height / 3);
 
 			let whichSpectralType = Math.floor(
 			    randomUniform( 0, category.spectralTypes.length ) );

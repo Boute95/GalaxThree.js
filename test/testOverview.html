@@ -19,7 +19,7 @@
     <body id="body">
 	
 	<canvas id="myCanvas"></canvas>
-	<img id="shape" src="../resources/mw-star-map.png"/>
+	<img id="shape" src="../resources/mw-star-map-RGB.png"/>
 	<img id="cloud" src="../resources/mw-cloud-map.png"/>
 
 	<script src="../js/lib/stats.min.js"></script>
@@ -94,14 +94,14 @@
 	     // Galaxy
 	     let imgStarMap = document.getElementById( "shape" );
 	     let imgCloudMap = document.getElementById( "cloud" );
-             galaxy = new Galaxy(scene,
-				 "../resources/particle3.png",
-				 imgStarMap,
-				 imgCloudMap,
-				 radiusGalaxyInLy,
-				 radiusGalaxyInLy / 50,
-				 1e6 );
-
+             galaxy = new Galaxy( scene,
+				  "../resources/particle3.png",
+				  imgStarMap,
+				  imgCloudMap,
+				  1e7,
+				  radiusGalaxyInLy );
+				  
+				
 	     // Monitoring
 	     statsFPS = new Stats();
 	     statsFPS.showPanel(0);
