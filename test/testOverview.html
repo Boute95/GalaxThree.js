@@ -43,7 +43,7 @@
 
 	 // Variables
 	 const radiusGalaxyInLy = 1e5; //< In light years.
-	 const farViewInLy = 3e5;
+	 const farViewInLy = 5e5;
 	 var statsFPS, gui, myCanvas;
 	 var bloomPass, composer, renderer, camera, controls, scene, galaxy;
 	 var params = {
@@ -86,7 +86,7 @@
 	     controls = new THREE.OrbitControls(camera, myCanvas);
 	     //controls.enableDamping = true;
 	     controls.minDistance = ly;
-	     controls.maxDistance = 2 * radiusGalaxyInLy * ly;
+	     controls.maxDistance = farViewInLy * ly;
 	     
 	     // Scene
 	     scene = new THREE.Scene();
@@ -98,7 +98,7 @@
 				  "../resources/particle3.png",
 				  imgStarMap,
 				  imgCloudMap,
-				  1e7,
+				  5e4,
 				  radiusGalaxyInLy );
 				  
 				
@@ -127,8 +127,7 @@
 	 function render() {
 	     statsFPS.begin();
 	     composer.render();
-	     let v = controls.object.position.clone()
-	     galaxy.update( v );
+	     galaxy.update( camera );
 	     statsFPS.end();
 	     requestAnimationFrame(render);
 	 }

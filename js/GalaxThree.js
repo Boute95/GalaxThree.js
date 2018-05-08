@@ -39,7 +39,7 @@ function Galaxy( scene,
 		 numberOfStars = 1e6,
 		 radiusInLy = 1e5,
 		 heightInLy = 3e3,
-		 maxHeightInLy = 15e3 ) {
+		 maxHeightInLy = 10e3 ) {
 		
     let self = this;
     
@@ -52,7 +52,7 @@ function Galaxy( scene,
     this.maxHeightInKm = maxHeightInLy * ly;
 
     this.galaxyPlane;
-    
+
     this.arrayStarCategories = [
 	// new StarCategory("MS_M",["M"],
 	// 		 0.3,     0.01,       0.8),
@@ -113,22 +113,39 @@ function Galaxy( scene,
     let nbClouds = generateClouds( 1e4, imgCloudMap, scene );
     writeConsole( "Number of clouds : " + nbClouds );
 
-    setGalaxTexture( scene );
+    setGalaxPlane( scene );
 
-
-
+  //  this.galaxyPlane.rotation.set( Math.PI / 2, Math.PI / 2, 0 );
+    this.galaxyPlane.geometry.computeVertexNormals();
+    this.galaxyNormalVect = new THREE.Vector3();
+    this.galaxyNormalVect.x = this.galaxyPlane.geometry.getAttribute( "normal" ).array[0];
+    this.galaxyNormalVect.y = this.galaxyPlane.geometry.getAttribute( "normal" ).array[1];
+    this.galaxyNormalVect.z = this.galaxyPlane.geometry.getAttribute( "normal" ).array[2];
+    this.maxOpacityGalaxPlane = 0.3;
+    let beginHidePlaneAngle = 0.01;
+    let factorOpacityAccordToAngleCam = this.maxOpacityGalaxPlane / beginHidePlaneAngle;
     
-    this.update = function( cameraPosition )  {
+    
+    this.update = function( camera )  {
 
-	// update the cam position to the plane's uniform.
-	this.galaxyPlane.worldToLocal( cameraPosition );
-	this.galaxyPlane.material.uniforms[ 'myCamPosition' ].value = cameraPosition;
+	// Update the cam position in the plane's uniform.
+	let camPos = camera.position.clone();
+	this.galaxyPlane.worldToLocal( camPos );
+	this.galaxyPlane.material.uniforms[ 'myCamPosition' ].value = camPos.clone();
 
-	// calculate plane's normal vector
-	let v1;
-	// reduce the plane's opacity when the camera sees the its side.
-	
-	
+	// Calculate the angle of the camera from the plane.
+	camPos.normalize();
+	camPos.projectOnVector( this.galaxyNormalVect );
+
+	// Reduces the plane opacity in function of the angle of the camera.
+	let lengthProjection = camPos.lengthSq();
+	if ( lengthProjection < beginHidePlaneAngle ) {
+	    this.galaxyPlane.material.uniforms[ 'maxOpacity' ].value =
+		factorOpacityAccordToAngleCam * lengthProjection;
+	}
+	else {
+	    this.galaxyPlane.material.uniforms[ 'maxOpacity' ].value = this.maxOpacityGalaxPlane;
+	}
     };
     
     
@@ -178,7 +195,7 @@ function Galaxy( scene,
 	for ( let i = 0 ; i < imgData.data.length ; i += 4 ) {
 
 	    let nbOfStarsForThisPixel =
-		nbOfStarsForAWhitePixel * ( imgData.data[i] / 255 );
+		nbOfStarsForAWhitePixel * ( imgData.data[i] / 255.0 );
 	    let pixelX = ( i / 4 ) % img.width;
 	    let pixelY = Math.floor( ( i / 4 ) / img.width );
 	    let worldXMin = pixelX * pixelSizeInWorldCoord - pixelSizeInWorldCoord / 2
@@ -241,7 +258,7 @@ function Galaxy( scene,
 
 	let S = 0;
 	for ( let i = 0 ; i < imgData.data.length ; i+=4 ) {
-	    S += imgData.data[i];
+	    S += imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2];
 	}
 	return ( nbOfStars / S ) * 255;
 	
@@ -345,7 +362,7 @@ function Galaxy( scene,
 
 
     //////////////////////////////////////////////////////////////////////
-    function setGalaxTexture( scene ) {
+    function setGalaxPlane( scene ) {
 
 	let geo = new THREE.PlaneBufferGeometry( self.radiusInKm * 2, self.radiusInKm * 2 );
 	let tex = new THREE.TextureLoader().load( "../resources/milkyway.png" );
@@ -355,14 +372,13 @@ function Galaxy( scene,
 	let minOpacityDistance = 1e4 * ly;
 	let cstOpacityFunction = minOpacityDistance / ( minOpacityDistance - maxOpacityDistance );
 	let factorOpacityFunction =  - cstOpacityFunction / minOpacityDistance;
-	let maxOpacity = 0.4;
 		
 	// Set built-in uniforms and adds some custom one
 	let uniforms = THREE.UniformsUtils.merge( [
 	    THREE.UniformsUtils.clone( basicShader.uniforms ),
 	    { cstOpacityFunction: { value: cstOpacityFunction } },
 	    { factorOpacityFunction: { value: factorOpacityFunction } },
-	    { maxOpacity: { value: maxOpacity } },
+	    { maxOpacity: { value: 1 } },
 	    { myCamPosition: { value: new THREE.Vector3( 0, 0, 0 ) } },
 	] );
 	uniforms[ 'map' ].value = tex;
@@ -443,6 +459,7 @@ function Galaxy( scene,
     } // end function
 
 
+    
 
 
     
