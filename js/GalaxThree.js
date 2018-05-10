@@ -144,7 +144,8 @@ function Galaxy( scene,
 		factorOpacityAccordToAngleCam * lengthProjection;
 	}
 	else {
-	    this.galaxyPlane.material.uniforms[ 'maxOpacity' ].value = this.maxOpacityGalaxPlane;
+	    this.galaxyPlane.material.uniforms[ 'maxOpacity' ].value =
+		this.maxOpacityGalaxPlane;
 	}
     };
     
@@ -342,7 +343,8 @@ function Galaxy( scene,
 		    let z = worldZ;
 		    let y = randomGauss() * 0.2 * self.heightInKm;
 		    let whichCloudTex = Math.floor( Math.random() * materials.length );
-		    geometries[whichCloudTex].vertices.push( new THREE.Vector3( x, 0, z ) );
+		    geometries[whichCloudTex].vertices.push(
+			new THREE.Vector3( x, 0, z ) );
 		    ++cloudPlaced;
 		    cloudIsPlaced = true;
 		    
