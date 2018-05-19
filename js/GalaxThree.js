@@ -1,3 +1,10 @@
+/**
+ * This file is under GNU Public Licence V3.
+ *
+ * @author Alexis Breton
+ *
+ */
+
 
 /////////////////
 // Global data //
@@ -22,7 +29,7 @@ function StarCategory(name, spectralTypes, radius, luminosity, proba) {
 
 
 
-/////////////////////
+////////////////////
 // Galaxy object //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -40,7 +47,10 @@ function Galaxy( scene,
 		 radiusInLy = 1e5,
 		 heightInLy = 3e3,
 		 maxHeightInLy = 10e3 ) {
-		
+    
+    //////////////////////////////////////////////////////////////////////
+    // Attributes
+    
     let self = this;
     
     this.starCount = 0;
@@ -51,6 +61,11 @@ function Galaxy( scene,
 
     this.maxHeightInKm = maxHeightInLy * ly;
 
+    this.starTexture;
+
+    // Array of geometry and material for each spectral type of each star category.
+    this.geoAndMatStarCategories = [ ];
+    
     this.galaxyPlane;
 
     this.arrayStarCategories = [
@@ -87,73 +102,84 @@ function Galaxy( scene,
 	D : 0x9BB2FF,
     };
 
+    // end attributes
+    //////////////////////////////////////////////////////////////////////
 
-    let starTexture = new THREE.TextureLoader().load( starImagePath );
-
-    // Array of geometry and material for each spectral type of each category.
-    let geoAndMaterialsOfCategories = [ ];
-
-    // Creates geometries and materials according to categories and their
-    // spectral types.
-    createGeoAndMaterials( geoAndMaterialsOfCategories );
-
-    generateStarsAccordingToMap( numberOfStars, imgStarMap );
-    writeConsole( "Number of stars : " + this.starCount );
-
-    // Adds stars to the scene.
-    for ( let category of geoAndMaterialsOfCategories ) {
-	for ( let geoAndMat of category ) {
-	    if ( geoAndMat["geometry"].vertices.length > 0 ) {
-		let mesh = new THREE.Points( geoAndMat["geometry"], geoAndMat["material"] );
-		scene.add( mesh );
-	    }
-	}
-    }
-
-    let nbClouds = generateClouds( 1e4, imgCloudMap, scene );
-    writeConsole( "Number of clouds : " + nbClouds );
-
-    setGalaxPlane( scene );
-
-  //  this.galaxyPlane.rotation.set( Math.PI / 2, Math.PI / 2, 0 );
-    this.galaxyPlane.geometry.computeVertexNormals();
-    this.galaxyNormalVect = new THREE.Vector3();
-    this.galaxyNormalVect.x = this.galaxyPlane.geometry.getAttribute( "normal" ).array[0];
-    this.galaxyNormalVect.y = this.galaxyPlane.geometry.getAttribute( "normal" ).array[1];
-    this.galaxyNormalVect.z = this.galaxyPlane.geometry.getAttribute( "normal" ).array[2];
-    this.maxOpacityGalaxPlane = 0.3;
-    let beginHidePlaneAngle = 0.01;
-    let factorOpacityAccordToAngleCam = this.maxOpacityGalaxPlane / beginHidePlaneAngle;
     
+    //////////////////////////////////////////////////////////////////////
+    // Public methods
     
     this.update = function( camera )  {
 
 	// Update the cam position in the plane's uniform.
 	let camPos = camera.position.clone();
-	this.galaxyPlane.worldToLocal( camPos );
-	this.galaxyPlane.material.uniforms[ 'myCamPosition' ].value = camPos.clone();
+	self.galaxyPlane.worldToLocal( camPos );
+	self.galaxyPlane.material.uniforms[ 'myCamPosition' ].value = camPos.clone();
 
 	// Calculate the angle of the camera from the plane.
 	camPos.normalize();
-	camPos.projectOnVector( this.galaxyNormalVect );
+	camPos.projectOnVector( self.galaxyPlane.normalVect );
 
 	// Reduces the plane opacity in function of the angle of the camera.
 	let lengthProjection = camPos.lengthSq();
-	if ( lengthProjection < beginHidePlaneAngle ) {
-	    this.galaxyPlane.material.uniforms[ 'maxOpacity' ].value =
-		factorOpacityAccordToAngleCam * lengthProjection;
+	if ( lengthProjection < self.galaxyPlane.beginHideAngle ) {
+	    self.galaxyPlane.material.uniforms[ 'maxOpacity' ].value =
+		galaxyPlane.opacityFactorAccToCamAngle * lengthProjection;
 	}
 	else {
-	    this.galaxyPlane.material.uniforms[ 'maxOpacity' ].value =
-		this.maxOpacityGalaxPlane;
+	    self.galaxyPlane.material.uniforms[ 'maxOpacity' ].value =
+		self.galaxyPlane.maxOpacity;
 	}
-    };
+	
+    }; // end method
     
-    
 
-
-
+    // end public methods
     //////////////////////////////////////////////////////////////////////
+
+
+
+    
+    init();
+
+    
+
+    
+    //////////////////////////////////////////////////////////////////////
+    // Private methods
+    
+    function init() {
+	
+	self.starTexture = new THREE.TextureLoader().load( starImagePath );
+	
+	// Creates geometries and materials according to categories and their
+	// spectral types.
+	createGeoAndMaterials( self.geoAndMatStarCategories );
+
+	generateStarsAccordingToMap( numberOfStars, imgStarMap );
+	writeConsole( "Number of stars : " + self.starCount );
+	
+	// Adds stars to the scene.
+	for ( let category of self.geoAndMatStarCategories ) {
+	    for ( let geoAndMat of category ) {
+		if ( geoAndMat["geometry"].vertices.length > 0 ) {
+		    let mesh = new THREE.Points( geoAndMat["geometry"], geoAndMat["material"] );
+		    scene.add( mesh );
+		}
+	    }
+	}
+	
+	let nbClouds = generateClouds( 1e4, imgCloudMap, scene );
+	
+	setGalaxPlane( scene );
+	
+	
+    } // end method
+
+
+    
+
+    //////////////////////////////////////////////////
     function createGeoAndMaterials( arrayGeoAndMaterials ) {
 
 	for ( let i = 0 ; i < self.arrayStarCategories.length ; ++i ) {
@@ -169,7 +195,7 @@ function Galaxy( scene,
 		    
 		    material : new THREE.PointsMaterial( {
 			color: self.spectralTypeToColor[ spectralType ],
-			map: starTexture,
+			map: self.starTexture,
 			size: 1e14,//Math.pow( category.luminosity, 0.8 ) * 1e13,
 			blending: THREE.AdditiveBlending,
 			transparent: true,
@@ -184,8 +210,8 @@ function Galaxy( scene,
 
 
 
-        
-    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////        
+
     function generateStarsAccordingToMap( numberOfStars, img ) {
 					  
 	let imgData = getImgDataArray( img );
@@ -231,7 +257,7 @@ function Galaxy( scene,
 
 			let whichSpectralType = Math.floor(
 			    randomUniform( 0, category.spectralTypes.length ) );
-			geoAndMaterialsOfCategories
+			self.geoAndMatStarCategories
 			[ categoryIndex ]
 			[ whichSpectralType ]
 			[ "geometry" ].vertices.push( starVertex );
@@ -253,8 +279,7 @@ function Galaxy( scene,
     
 
 
-    
-    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////    
     function getNbOfStarsWhitePixel( imgData, nbOfStars ) {
 
 	let S = 0;
@@ -267,8 +292,7 @@ function Galaxy( scene,
 
 
 
-    
-    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////
     function generateClouds( numberOfCloud, img, scene ) {
 
 	// Takes the data from the image.
@@ -362,8 +386,7 @@ function Galaxy( scene,
 
     
 
-
-    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////
     function setGalaxPlane( scene ) {
 
 	let geo = new THREE.PlaneBufferGeometry( self.radiusInKm * 2, self.radiusInKm * 2 );
@@ -434,13 +457,23 @@ function Galaxy( scene,
 	self.galaxyPlane = new THREE.Mesh( geo, mat );
 	self.galaxyPlane.rotation.x = - Math.PI / 2;
 	scene.add( self.galaxyPlane );
+
+	self.galaxyPlane.geometry.computeVertexNormals();
+	self.galaxyPlane.normalVect = new THREE.Vector3();
+	self.galaxyPlane.normalVect.x = self.galaxyPlane.geometry.getAttribute( "normal" ).array[0];
+	self.galaxyPlane.normalVect.y = self.galaxyPlane.geometry.getAttribute( "normal" ).array[1];
+	self.galaxyPlane.normalVect.z = self.galaxyPlane.geometry.getAttribute( "normal" ).array[2];
+	self.galaxyPlane.maxOpacity = 0.3;
+	self.galaxyPlane.beginHideAngle = 0.01;
+	self.galaxyPlane.opacityFactorAccToCamAngle =
+	    self.galaxyPlane.maxOpacity / self.galaxyPlane.beginHideAngle;
+
 	
     }
 
 
     
-
-    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////
     function generateCluster( geometry,
 			      numberOfStars,
 			      radiusInKm,
@@ -461,8 +494,6 @@ function Galaxy( scene,
     } // end function
 
 
-    
-
 
     
 } // end constructor
@@ -471,9 +502,8 @@ function Galaxy( scene,
 
 
 
-/////////////////////
-// Other functions //
 ////////////////////////////////////////////////////////////////////////////////
+// Utility functions
 
 function randomUniform( min = 0, max = 1 ) {
     return Math.random() * ( max - min ) + min;
