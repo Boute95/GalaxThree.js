@@ -34,10 +34,7 @@ function StarCategory(name, spectralTypes, radius, luminosity, proba) {
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Constructor for Galaxy object. It is a big sphere.
- * @param radius Radius of the galaxy in light year.
- * @param starDensity Number of stars per cubic light year.
- * @param positionOfCenter Position of galaxy's center in the world coordinates.
+ * Constructor for Galaxy object.
  */ 
 function Galaxy( scene,
 		 starImagePath,
@@ -65,7 +62,8 @@ function Galaxy( scene,
 
     // Array of geometry and material for each spectral type of each star category.
     this.geoAndMatStarCategories = [ ];
-    
+
+    // Texture of the galaxy displayed when getting farther from it.
     this.galaxyPlane;
 
     this.arrayStarCategories = [
@@ -124,7 +122,7 @@ function Galaxy( scene,
 	let lengthProjection = camPos.lengthSq();
 	if ( lengthProjection < self.galaxyPlane.beginHideAngle ) {
 	    self.galaxyPlane.material.uniforms[ 'maxOpacity' ].value =
-		galaxyPlane.opacityFactorAccToCamAngle * lengthProjection;
+		self.galaxyPlane.opacityFactorAccToCamAngle * lengthProjection;
 	}
 	else {
 	    self.galaxyPlane.material.uniforms[ 'maxOpacity' ].value =
@@ -154,7 +152,7 @@ function Galaxy( scene,
 	
 	// Creates geometries and materials according to categories and their
 	// spectral types.
-	createGeoAndMaterials( self.geoAndMatStarCategories );
+	createStarGeoAndMaterials( self.geoAndMatStarCategories );
 
 	generateStarsAccordingToMap( numberOfStars, imgStarMap );
 	writeConsole( "Number of stars : " + self.starCount );
@@ -173,14 +171,13 @@ function Galaxy( scene,
 	
 	setGalaxPlane( scene );
 	
-	
     } // end method
 
 
     
 
     //////////////////////////////////////////////////
-    function createGeoAndMaterials( arrayGeoAndMaterials ) {
+    function createStarGeoAndMaterials( arrayGeoAndMaterials ) {
 
 	for ( let i = 0 ; i < self.arrayStarCategories.length ; ++i ) {
 
@@ -191,29 +188,33 @@ function Galaxy( scene,
 
 		arrayGeoAndMaterials[i].push( {
 		    
-		    geometry : new THREE.Geometry(),
+		    geometry: new THREE.Geometry(),
+
+		    material: getStarMaterial( category.luminosity,
+		    			       self.spectralTypeToColor[ spectralType ] ),
 		    
-		    material : new THREE.PointsMaterial( {
-			color: self.spectralTypeToColor[ spectralType ],
-			map: self.starTexture,
-			size: 1e14,//Math.pow( category.luminosity, 0.8 ) * 1e13,
-			blending: THREE.AdditiveBlending,
-			transparent: true,
-			alphaTest: 0.5,
-		    } ) } );
+		    // material : new THREE.PointsMaterial( {
+		    // 	color: self.spectralTypeToColor[ spectralType ],
+		    // 	map: self.starTexture,
+		    // 	size: 1e14,//Math.pow( category.luminosity, 0.8 ) * 1e13,
+		    // 	blending: THREE.AdditiveBlending,
+		    // 	transparent: true,
+		    // 	alphaTest: 0.5,
+		    // } ),
+
+		} );
 	    	
 	    } // end for each spectral type of the category.
 	    
 	} // end for each category.
 
-    } // end function
+    } // end method
 
 
 
     //////////////////////////////////////////////////        
-
     function generateStarsAccordingToMap( numberOfStars, img ) {
-					  
+	
 	let imgData = getImgDataArray( img );
 	let nbOfStarsForAWhitePixel = getNbOfStarsWhitePixel( imgData, numberOfStars );
 	let pixelSizeInWorldCoord = self.radiusInKm * 2 / img.width;
@@ -275,7 +276,7 @@ function Galaxy( scene,
 	} // end for each pixel of the map.
 
 	
-    } // end function
+    } // end method
     
 
 
@@ -288,7 +289,7 @@ function Galaxy( scene,
 	}
 	return ( nbOfStars / S ) * 255;
 	
-    } // end function
+    } // end method
 
 
 
@@ -316,12 +317,12 @@ function Galaxy( scene,
 	
 	let materials = [
 	    new THREE.PointsMaterial( { color: 0x120904,
-					map: textures[0],
-					size: 7e3 * ly,
-					transparent: true,
-					depthWrite: false,
-					opacity: 0.3,
-				      } ),
+				  map: textures[0],
+				  size: 7e3 * ly,
+				  transparent: true,
+				  depthWrite: false,
+				  opacity: 0.3,
+				} ),
 	    new THREE.PointsMaterial( { color: 0x060503,
 	    				map: textures[1],
 	    				size: 7e3 * ly,
@@ -382,7 +383,7 @@ function Galaxy( scene,
 	
 	return cloudPlaced;
 	
-    } // end function
+    } // end method
 
     
 
@@ -397,7 +398,8 @@ function Galaxy( scene,
 	let minOpacityDistance = 1e4 * ly;
 	let cstOpacityFunction = minOpacityDistance / ( minOpacityDistance - maxOpacityDistance );
 	let factorOpacityFunction =  - cstOpacityFunction / minOpacityDistance;
-		
+
+	
 	// Set built-in uniforms and adds some custom one
 	let uniforms = THREE.UniformsUtils.merge( [
 	    THREE.UniformsUtils.clone( basicShader.uniforms ),
@@ -407,14 +409,15 @@ function Galaxy( scene,
 	    { myCamPosition: { value: new THREE.Vector3( 0, 0, 0 ) } },
 	] );
 	uniforms[ 'map' ].value = tex;
-		
+
+	
 	// Adds some code in vertex shader to reduce opacity when the camera gets closer
 	// to the mesh.
 	let vertexShader = basicShader.vertexShader;
 	let fragShader = basicShader.fragmentShader;
 	let customLinesBegVertex = [
 	    "varying vec3 vPosition;",
-	   	].join( '\n' );
+	].join( '\n' );
 	let customLinesVertex = [
 	    "vPosition = position;"
 	].join( '\n' );
@@ -436,14 +439,13 @@ function Galaxy( scene,
 	linesVertexShader.splice( 0, 0, customLinesBegVertex );
 	linesVertexShader.splice( 31, 0, customLinesVertex );
 	vertexShader = linesVertexShader.join( '\n' );
-	writeConsole( vertexShader );
 	
 	let linesFragShader = fragShader.split( '\n' );
 	linesFragShader.splice( 0, 0, customLinesBegFrag );
 	linesFragShader.splice( 43, 0, customLinesFrag );
 	fragShader = linesFragShader.join( '\n' );
-	writeConsole( fragShader );
-	
+
+	// Creates new material with the new shader.
 	let mat = new THREE.ShaderMaterial( {
 	    uniforms: uniforms,
 	    vertexShader: vertexShader,
@@ -453,23 +455,28 @@ function Galaxy( scene,
 	    blending: THREE.AdditiveBlending,
 	} );
 	mat.map = tex;
+
 	
+	// Constructs the mesh.
 	self.galaxyPlane = new THREE.Mesh( geo, mat );
 	self.galaxyPlane.rotation.x = - Math.PI / 2;
 	scene.add( self.galaxyPlane );
 
+	
+	// Set some attributes to the galaxyPlane useful for hiding it according to the
+	// camera angle.
 	self.galaxyPlane.geometry.computeVertexNormals();
 	self.galaxyPlane.normalVect = new THREE.Vector3();
 	self.galaxyPlane.normalVect.x = self.galaxyPlane.geometry.getAttribute( "normal" ).array[0];
 	self.galaxyPlane.normalVect.y = self.galaxyPlane.geometry.getAttribute( "normal" ).array[1];
 	self.galaxyPlane.normalVect.z = self.galaxyPlane.geometry.getAttribute( "normal" ).array[2];
-	self.galaxyPlane.maxOpacity = 0.3;
+	self.galaxyPlane.maxOpacity = 0.4;
 	self.galaxyPlane.beginHideAngle = 0.01;
 	self.galaxyPlane.opacityFactorAccToCamAngle =
 	    self.galaxyPlane.maxOpacity / self.galaxyPlane.beginHideAngle;
 
 	
-    }
+    } // end method
 
 
     
@@ -491,9 +498,44 @@ function Galaxy( scene,
 	    
 	}
 	
-    } // end function
+    } // end method
 
 
+
+    //////////////////////////////////////////////////
+    function getStarMaterial( luminosity, color ) {
+	
+	let defaultShader = THREE.ShaderLib[ 'points' ];
+
+	// Sets uniforms.
+	let uniforms = THREE.UniformsUtils.merge( [
+	    THREE.UniformsUtils.clone( defaultShader.uniforms ),
+	    { luminosity: { value: luminosity } },
+	] );
+	uniforms[ 'map' ].value = self.starTexture;
+
+	let vertexShader = defaultShader.vertexShader;
+	let fragShader = defaultShader.fragmentShader;
+
+	let customLinesBegVertex = [
+	    "uniform float luminosity;",
+	].join( '\n' );
+
+	writeConsole( vertexShader );
+
+	let mat = new THREE.ShaderMaterial( {
+	    uniforms: uniforms,
+	    vertexShader: vertexShader,
+	    fragmentShader: fragShader,
+	    transparent: true,
+//	    color: color,
+//	    size: 1e14,
+	} );
+	mat.map = self.starTexture;
+
+	return mat;
+
+    } // end method
 
     
 } // end constructor
