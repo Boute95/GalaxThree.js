@@ -17,7 +17,7 @@
 let ly = 9.46073047e12; //< 1 Light year in km.
 let solRadius = 6.957e5;
 
-function StarCategory(name, spectralTypes, radius, luminosity, proba) {
+function StarCategory( name, spectralTypes, radius, luminosity, proba ) {
     this.name = name;
     this.spectralTypes = spectralTypes;
     this.radius = radius;
@@ -317,12 +317,12 @@ function Galaxy( scene,
 	
 	let materials = [
 	    new THREE.PointsMaterial( { color: 0x120904,
-				  map: textures[0],
-				  size: 7e3 * ly,
-				  transparent: true,
-				  depthWrite: false,
-				  opacity: 0.3,
-				} ),
+					map: textures[0],
+					size: 7e3 * ly,
+					transparent: true,
+					depthWrite: false,
+					opacity: 0.3,
+				      } ),
 	    new THREE.PointsMaterial( { color: 0x060503,
 	    				map: textures[1],
 	    				size: 7e3 * ly,
@@ -505,17 +505,19 @@ function Galaxy( scene,
     //////////////////////////////////////////////////
     function getStarMaterial( luminosity, color ) {
 	
-	let defaultShader = THREE.ShaderLib[ 'points' ];
+	let pointShader = THREE.ShaderLib[ 'points' ];
+	let basicShader = THREE.ShaderLib[ 'basic' ];
 
 	// Sets uniforms.
 	let uniforms = THREE.UniformsUtils.merge( [
-	    THREE.UniformsUtils.clone( defaultShader.uniforms ),
+	    THREE.UniformsUtils.clone( pointShader.uniforms ),
+	    THREE.UniformsUtils.clone( basicShader.uniforms ),
 	    { luminosity: { value: luminosity } },
 	] );
 	uniforms[ 'map' ].value = self.starTexture;
 
-	let vertexShader = defaultShader.vertexShader;
-	let fragShader = defaultShader.fragmentShader;
+	let vertexShader = pointShader.vertexShader;
+	let fragShader = pointShader.fragmentShader;
 
 	let customLinesBegVertex = [
 	    "uniform float luminosity;",
@@ -532,6 +534,11 @@ function Galaxy( scene,
 //	    size: 1e14,
 	} );
 	mat.map = self.starTexture;
+	mat.needsUpdate = true;
+	mat.uniforms[ 'size' ].value = 10;
+	mat.uniforms[ 'diffuse' ].value = new THREE.Color( color );
+	mat.blending = THREE.AdditiveBlending;
+	mat.alphaTest = 0.5;
 
 	return mat;
 
