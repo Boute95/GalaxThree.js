@@ -90,6 +90,8 @@ function Galaxy( scene,
 	new StarCategory("SG",  ["O","B","A","F","G","K","M"],
 			 300.0,   600000.0,   0.000001),
     ];
+
+    this.maxStarLuminosity;
     
     this.spectralTypeToColor = {
 	M : 0xFFCC6F,
@@ -158,6 +160,9 @@ function Galaxy( scene,
     function init() {
 	
 	self.starTexture = new THREE.TextureLoader().load( starImagePath );
+
+	self.maxStarLuminosity = Math.max.apply( Math, self.arrayStarCategories.map(
+	    function( o ) { return o.luminosity; } ) );
 	
 	// Creates geometries and materials according to categories and their
 	// spectral types.
@@ -505,7 +510,7 @@ function Galaxy( scene,
 	let pointShader = THREE.ShaderLib[ 'points' ];
 	let basicShader = THREE.ShaderLib[ 'basic' ];
 
-	let maxOpacityDistance = 1e4 * Math.sqrt( luminosity ) *  ly;
+	let maxOpacityDistance = 5e3 * Math.sqrt( luminosity ) *  ly;
 	let minOpacityDistance = 1e5 * Math.sqrt( luminosity ) * ly;
 	let cstOpacityFunction = minOpacityDistance / ( minOpacityDistance - maxOpacityDistance );
 	let factorOpacityFunction =  - cstOpacityFunction / minOpacityDistance;
@@ -554,12 +559,12 @@ function Galaxy( scene,
 	    uniforms: uniforms,
 	    vertexShader: vertexShader,
 	    fragmentShader: fragShader,
-	    blending: THREE.AdditiveBlending,
 	    transparent: true,
+	    blending: THREE.AdditiveBlending,
 	} );
 	
 	mat.map = self.starTexture;
-	mat.uniforms[ 'size' ].value = 1;
+	mat.uniforms[ 'size' ].value = 1 + ( luminosity * 2 / self.maxStarLuminosity );
 	mat.uniforms[ 'diffuse' ].value = new THREE.Color( color );
 	mat.alphaTest = 0.3;
 
