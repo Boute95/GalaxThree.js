@@ -63,12 +63,14 @@ function Galaxy( scene,
     // Array of geometry and material for each spectral type of each star category.
     this.geoAndMatStarCategories = [ ];
 
-    // Texture of the galaxy displayed when getting farther from it.
+    this.starMeshes = [ ];
+
+    // Displays the galaxy's texture camera gets farther from it.
     this.galaxyPlane;
 
     this.arrayStarCategories = [
-	new StarCategory("MS_M",["M"],
-	 		 0.3,     0.01,       0.8),
+	// new StarCategory("MS_M",["M"],
+	// 		 0.3,     0.01,       0.8),
 	new StarCategory("MS_K",["K"],
 			 0.8,     0.2,        0.08),
 	new StarCategory("MS_G",["G"],
@@ -112,14 +114,13 @@ function Galaxy( scene,
 	// Update the cam position in the plane's uniform.
 	let camPos = camera.position.clone();
 	self.galaxyPlane.worldToLocal( camPos );
-	let camPosClone = camPos.clone();
-	self.galaxyPlane.material.uniforms[ 'myCamPosition' ].value = camPosClone;
+	self.galaxyPlane.material.uniforms[ 'myCamPosition' ].value = camPos.clone();
 
 	// Updates the cam position for each stars' materials
-	for ( let category of self.geoAndMatStarCategories ) {
-	    for ( let geoMatPair of category ) {
-		geoMatPair.material.uniforms[ 'myCamPosition' ].value = camPosClone;
-	    }
+	for ( let mesh of self.starMeshes ) {
+	    let camPos = camera.position.clone();
+	    mesh.worldToLocal( camPos );
+	    mesh.material.uniforms[ 'myCamPosition' ].value = camPos;
 	}
 
 	// Calculate the angle of the camera from the plane.
@@ -170,6 +171,7 @@ function Galaxy( scene,
 	    for ( let geoAndMat of category ) {
 		if ( geoAndMat["geometry"].vertices.length > 0 ) {
 		    let mesh = new THREE.Points( geoAndMat["geometry"], geoAndMat["material"] );
+		    self.starMeshes.push( mesh );
 		    scene.add( mesh );
 		}
 	    }
@@ -504,7 +506,7 @@ function Galaxy( scene,
 	let basicShader = THREE.ShaderLib[ 'basic' ];
 
 	let maxOpacityDistance = 1e4 * Math.sqrt( luminosity ) *  ly;
-	let minOpacityDistance = 3e4 * Math.sqrt( luminosity ) * ly;
+	let minOpacityDistance = 1e5 * Math.sqrt( luminosity ) * ly;
 	let cstOpacityFunction = minOpacityDistance / ( minOpacityDistance - maxOpacityDistance );
 	let factorOpacityFunction =  - cstOpacityFunction / minOpacityDistance;
 
