@@ -67,8 +67,8 @@ function Galaxy( scene,
     this.galaxyPlane;
 
     this.arrayStarCategories = [
-	// new StarCategory("MS_M",["M"],
-	// 		 0.3,     0.01,       0.8),
+	new StarCategory("MS_M",["M"],
+	 		 0.3,     0.01,       0.8),
 	new StarCategory("MS_K",["K"],
 			 0.8,     0.2,        0.08),
 	new StarCategory("MS_G",["G"],
@@ -112,7 +112,15 @@ function Galaxy( scene,
 	// Update the cam position in the plane's uniform.
 	let camPos = camera.position.clone();
 	self.galaxyPlane.worldToLocal( camPos );
-	self.galaxyPlane.material.uniforms[ 'myCamPosition' ].value = camPos.clone();
+	let camPosClone = camPos.clone();
+	self.galaxyPlane.material.uniforms[ 'myCamPosition' ].value = camPosClone;
+
+	// Updates the cam position for each stars' materials
+	for ( let category of self.geoAndMatStarCategories ) {
+	    for ( let geoMatPair of category ) {
+		geoMatPair.material.uniforms[ 'myCamPosition' ].value = camPosClone;
+	    }
+	}
 
 	// Calculate the angle of the camera from the plane.
 	camPos.normalize();
@@ -187,21 +195,9 @@ function Galaxy( scene,
 	    for ( let spectralType of category.spectralTypes ) {
 
 		arrayGeoAndMaterials[i].push( {
-		    
 		    geometry: new THREE.Geometry(),
-
 		    material: getStarMaterial( category.luminosity,
 		    			       self.spectralTypeToColor[ spectralType ] ),
-		    
-		    // material : new THREE.PointsMaterial( {
-		    // 	color: self.spectralTypeToColor[ spectralType ],
-		    // 	map: self.starTexture,
-		    // 	size: 1e14,//Math.pow( category.luminosity, 0.8 ) * 1e13,
-		    // 	blending: THREE.AdditiveBlending,
-		    // 	transparent: true,
-		    // 	alphaTest: 0.5,
-		    // } ),
-
 		} );
 	    	
 	    } // end for each spectral type of the category.
@@ -321,21 +317,21 @@ function Galaxy( scene,
 					size: 7e3 * ly,
 					transparent: true,
 					depthWrite: false,
-					opacity: 0.3,
+					opacity: 0.1,
 				      } ),
 	    new THREE.PointsMaterial( { color: 0x060503,
 	    				map: textures[1],
 	    				size: 7e3 * ly,
 	    				transparent: true,
 					depthWrite: false,
-					opacity: 0.3,
+					opacity: 0.1,
 				      } ),
 	    new THREE.PointsMaterial( { color: 0x060503,
 	    				map: textures[2],
 	    				size: 8e3 * ly,
 	    				transparent: true,
 					depthWrite: false,
-					opacity: 0.4,
+					opacity: 0.06,
 				      } ),
 	];
 	
@@ -398,7 +394,6 @@ function Galaxy( scene,
 	let minOpacityDistance = 1e4 * ly;
 	let cstOpacityFunction = minOpacityDistance / ( minOpacityDistance - maxOpacityDistance );
 	let factorOpacityFunction =  - cstOpacityFunction / minOpacityDistance;
-
 	
 	// Set built-in uniforms and adds some custom one
 	let uniforms = THREE.UniformsUtils.merge( [
@@ -430,7 +425,7 @@ function Galaxy( scene,
 	].join( '\n' );
 	let customLinesFrag = [
 	    "float cameraDistance = distance( myCamPosition, vPosition );",
-	    "float customOpacity = factorOpacityFunction * cameraDistance + cstOpacityFunction;",
+	    "float customOpacity = factorOpacityFunction * cameraDistance + cstOpacityFunction ;",
 	    "customOpacity = min( customOpacity, maxOpacity );",
 	    "gl_FragColor = vec4( outgoingLight, customOpacity );"
 	].join( '\n' );
@@ -508,37 +503,63 @@ function Galaxy( scene,
 	let pointShader = THREE.ShaderLib[ 'points' ];
 	let basicShader = THREE.ShaderLib[ 'basic' ];
 
+	let maxOpacityDistance = 1e4 * Math.sqrt( luminosity ) *  ly;
+	let minOpacityDistance = 3e4 * Math.sqrt( luminosity ) * ly;
+	let cstOpacityFunction = minOpacityDistance / ( minOpacityDistance - maxOpacityDistance );
+	let factorOpacityFunction =  - cstOpacityFunction / minOpacityDistance;
+
 	// Sets uniforms.
 	let uniforms = THREE.UniformsUtils.merge( [
 	    THREE.UniformsUtils.clone( pointShader.uniforms ),
 	    THREE.UniformsUtils.clone( basicShader.uniforms ),
-	    { luminosity: { value: luminosity } },
+	    { cstOpacityFunction: { value: cstOpacityFunction } },
+	    { factorOpacityFunction: { value: factorOpacityFunction } },
+	    { myCamPosition: { value: new THREE.Vector3( 0, 0, 0 ) } },
 	] );
 	uniforms[ 'map' ].value = self.starTexture;
 
 	let vertexShader = pointShader.vertexShader;
 	let fragShader = pointShader.fragmentShader;
-
 	let customLinesBegVertex = [
-	    "uniform float luminosity;",
+	    "varying vec3 vPosition;",
+	].join( '\n' );
+	let customLinesVertex = [
+	    "vPosition = position;"
+	].join( '\n' );
+	let customLinesBegFrag = [
+	    "uniform float cstOpacityFunction;",
+	    "uniform float factorOpacityFunction;",
+	    "uniform vec3 myCamPosition;",
+	    "varying vec3 vPosition;",
+	].join( '\n' );
+	let customLinesFrag = [
+	    "float cameraDistance = distance( myCamPosition, vPosition );",
+	    "float correctedOpacity = factorOpacityFunction * cameraDistance + cstOpacityFunction;",
+	    "diffuseColor = vec4( vec3( diffuseColor ), correctedOpacity );",
 	].join( '\n' );
 
-	writeConsole( vertexShader );
+	let linesVertexShader = vertexShader.split( '\n' );
+	linesVertexShader.splice( 0, 0, customLinesBegVertex );
+	linesVertexShader.splice( 23, 0, customLinesVertex );
+	vertexShader = linesVertexShader.join( '\n' );
+	
+	let linesFragShader = fragShader.split( '\n' );
+	linesFragShader.splice( 0, 0, customLinesBegFrag );
+	linesFragShader.splice( 15, 0, customLinesFrag );
+	fragShader = linesFragShader.join( '\n' );
 
 	let mat = new THREE.ShaderMaterial( {
 	    uniforms: uniforms,
 	    vertexShader: vertexShader,
 	    fragmentShader: fragShader,
+	    blending: THREE.AdditiveBlending,
 	    transparent: true,
-//	    color: color,
-//	    size: 1e14,
 	} );
+	
 	mat.map = self.starTexture;
-	mat.needsUpdate = true;
-	mat.uniforms[ 'size' ].value = 10;
+	mat.uniforms[ 'size' ].value = 1;
 	mat.uniforms[ 'diffuse' ].value = new THREE.Color( color );
-	mat.blending = THREE.AdditiveBlending;
-	mat.alphaTest = 0.5;
+	mat.alphaTest = 0.3;
 
 	return mat;
 
