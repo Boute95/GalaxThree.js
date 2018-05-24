@@ -566,7 +566,7 @@ function Galaxy( scene,
 	mat.map = self.starTexture;
 	mat.uniforms[ 'size' ].value = 1 + ( luminosity * 2 / self.maxStarLuminosity );
 	mat.uniforms[ 'diffuse' ].value = new THREE.Color( color );
-	mat.alphaTest = 0.3;
+	mat.alphaTest = 0.6;
 
 	return mat;
 
