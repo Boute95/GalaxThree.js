@@ -1,10 +1,5 @@
-/**
- * This file is under GNU Public Licence V3.
- *
- * @author Alexis Breton
- *
- */
-
+import * from './proba.js';
+import * from './utils.js';
 
 /////////////////
 // Global data //
@@ -669,3 +664,6 @@ function getMaxArray( array ) {
 function writeConsole(string) {
     console.log("[GALAX3] " + string);
 }
+
+
+export { Galaxy };
