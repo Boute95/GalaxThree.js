@@ -20,7 +20,7 @@
 	
 	<canvas id="myCanvas"></canvas>
 	<img id="shape" src="../js/galaxThree/resources/mw-star-map-RGB.png"/>
-	<img id="cloud" src="../js/galaxThree/resources/mw-cloud-map.png"/>
+	<img id="cloud" src="../js/galaxThree/resources/mw-cloud-map-RGB.png"/>
 
 	<script src="../js/lib/stats.min.js"></script>
 	<script src="../js/lib/dat.gui.min.js"></script>
@@ -100,12 +100,6 @@
 				     1e7,
 				     radiusGalaxyInLy );
 
-	     var geometry = new THREE.BoxGeometry( 1000 * G3.ly, 1000 * G3.ly, 1000 * G3.ly );
-	     console.log( G3.ly );
-	     var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-	     var cube = new THREE.Mesh( geometry, material );
-	     scene.add( cube );
-	     
 	     // Monitoring
 	     statsFPS = new Stats();
 	     statsFPS.showPanel(0);

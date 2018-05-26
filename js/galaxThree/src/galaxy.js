@@ -3,6 +3,7 @@ import { ly } from './consts.js';
 import { StarCategory } from './star/category.js';
 import { generateStars } from './star/generator.js';
 import { generateAbsorptionClouds } from './cloud/absorptionGenerator.js';
+import { generateEmissionClouds } from './cloud/emissionGenerator.js';
 import { generateGalaxPlane } from './plane.js';
 
 
@@ -22,6 +23,8 @@ function Galaxy( scene,
     // Attributes
     
     let self = this;
+
+    this.dirPath = galaxDirPath;
     
     this.starCount = 0;
     
@@ -132,7 +135,7 @@ function Galaxy( scene,
     
     function init() {
 	
-	self.starTexture = new THREE.TextureLoader().load( galaxDirPath + 'resources/particle4.png' );
+	self.starTexture = new THREE.TextureLoader().load( self.dirPath + 'resources/particle4.png' );
 
 	self.maxStarLuminosity = Math.max.apply( Math, self.arrayStarCategories.map(
 	    function( o ) { return o.luminosity; } ) );
@@ -140,7 +143,9 @@ function Galaxy( scene,
 	generateStars( self, numberOfStars, imgStarMap, scene );
 	writeConsole( "Number of stars : " + self.starCount );
 	
-	let nbClouds = generateAbsorptionClouds( self, 1e4, imgCloudMap, scene );
+	generateAbsorptionClouds( self, 5e3, imgCloudMap, scene );
+	generateEmissionClouds( self, 1e4, imgCloudMap, scene );
+	
 	
 	generateGalaxPlane( self, scene );
 	

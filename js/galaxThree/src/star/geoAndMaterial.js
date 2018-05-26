@@ -14,8 +14,8 @@ function createStarGeoAndMaterials( galaxy ) {
 		geometry: new THREE.Geometry(),
 		material: getStarMaterial( galaxy.starTexture,
 					   category.luminosity,
-		    			   galaxy.spectralTypeToColor[ spectralType ],
-					   galaxy.maxStarLuminosity ),
+					   galaxy.maxStarLuminosity ,
+		    			   galaxy.spectralTypeToColor[ spectralType ], )
 	    } );
 	    
 	} // end for each spectral type of the category.

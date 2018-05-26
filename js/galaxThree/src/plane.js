@@ -4,7 +4,7 @@ import { ly } from './consts.js';
 function generateGalaxPlane( galaxy, scene ) {
 
     let geo = new THREE.PlaneBufferGeometry( galaxy.radiusInKm * 2, galaxy.radiusInKm * 2 );
-    let tex = new THREE.TextureLoader().load( "../resources/milkyway.png" );
+    let tex = new THREE.TextureLoader().load( galaxy.dirPath + "resources/milkyway.png" );
     let basicShader = THREE.ShaderLib[ 'basic' ];
 
     let maxOpacityDistance = 4e5 * ly;
