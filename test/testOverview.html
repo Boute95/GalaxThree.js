@@ -19,8 +19,8 @@
     <body id="body">
 	
 	<canvas id="myCanvas"></canvas>
-	<img id="shape" src="../resources/mw-star-map-RGB.png"/>
-	<img id="cloud" src="../resources/mw-cloud-map.png"/>
+	<img id="shape" src="../js/galaxThree/resources/mw-star-map-RGB.png"/>
+	<img id="cloud" src="../js/galaxThree/resources/mw-cloud-map.png"/>
 
 	<script src="../js/lib/stats.min.js"></script>
 	<script src="../js/lib/dat.gui.min.js"></script>
@@ -32,11 +32,10 @@
 	<script src="../js/lib/ShaderPass.js"></script>
 	<script src="../js/lib/LuminosityHighPassShader.js"></script>
 	<script src="../js/lib/UnrealBloomPass.js"></script>
-	<script src="../js/galaxThree/galaxThree.js"></script>
+	<script type="module">
 
-	
-	<script>
-
+	 import { G3 } from '../js/galaxThree/src/galaxThree.js';
+	 
 	 //////////////////////////////////////////////////////////////////////
 	 // We suppose 1 unit = 1 km //
 	 //////////////////////////////
@@ -53,40 +52,40 @@
 	     bloomThreshold: 0.85,
 	     bloomRadius: 0.4,
 	 };
-	 
+
 	 init();
 	 initPostProcess();
 	 render();
 
 
-	 
+
 	 //////////////////////////////////////////////////////////////////////
 	 function init() {
 	     
 	     // Canvas resize
-	     myCanvas = document.getElementById("myCanvas");
+	     myCanvas = document.getElementById( "myCanvas" );
 	     myCanvas.width = window.innerWidth;
 	     myCanvas.height = window.innerHeight;
 
 	     // Renderer
 	     renderer = new THREE.WebGLRenderer(
 		 { canvas : myCanvas, antialias: true, logarithmicDepthBuffer: false } );
-	     renderer.setClearColor(0x030303);
-	     renderer.setPixelRatio(window.devicePixelRatio);
-	     renderer.setSize(myCanvas.width, myCanvas.height);
+	     renderer.setClearColor( 0x030303 );
+	     renderer.setPixelRatio( window.devicePixelRatio );
+	     renderer.setSize( myCanvas.width, myCanvas.height );
 	     
 	     // Camera
 	     camera = new THREE.PerspectiveCamera(
-		 50, myCanvas.width / myCanvas.height, 1e3 * ly, farViewInLy * ly );
-	     camera.position.y = radiusGalaxyInLy * ly;
+		 50, myCanvas.width / myCanvas.height, 1e3 * G3.ly, farViewInLy * G3.ly );
+	     camera.position.y = radiusGalaxyInLy * G3.ly;
 	     camera.rotation.z = Math.PI;
 	     camera.updateProjectionMatrix();
 	     
 	     // Controls
-	     controls = new THREE.OrbitControls(camera, myCanvas);
+	     controls = new THREE.OrbitControls( camera, myCanvas );
 	     //controls.enableDamping = true;
-	     controls.minDistance = ly;
-	     controls.maxDistance = farViewInLy * ly;
+	     controls.minDistance = G3.ly;
+	     controls.maxDistance = farViewInLy * G3.ly;
 	     
 	     // Scene
 	     scene = new THREE.Scene();
@@ -94,26 +93,31 @@
 	     // Galaxy
 	     let imgStarMap = document.getElementById( "shape" );
 	     let imgCloudMap = document.getElementById( "cloud" );
-             galaxy = new Galaxy( scene,
-				  "../resources/particle4.png",
-				  imgStarMap,
-				  imgCloudMap,
-				  1e7,
-				  radiusGalaxyInLy );
-	     
+	     galaxy = new G3.Galaxy( scene,
+				     '../js/galaxThree/',
+				     imgStarMap,
+				     imgCloudMap,
+				     1e7,
+				     radiusGalaxyInLy );
+
+	     var geometry = new THREE.BoxGeometry( 1000 * G3.ly, 1000 * G3.ly, 1000 * G3.ly );
+	     console.log( G3.ly );
+	     var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+	     var cube = new THREE.Mesh( geometry, material );
+	     scene.add( cube );
 	     
 	     // Monitoring
 	     statsFPS = new Stats();
 	     statsFPS.showPanel(0);
 	     document.body.appendChild(statsFPS.dom);
 
-	     // GUI
+	     // // GUI
 	     gui = new dat.GUI();
 	     gui.add( params, 'bloomThreshold', 0.0, 1.0 ).onChange( function ( value ) {
-		 bloomPass.threshold = Number( value );
+	      	 bloomPass.threshold = Number( value );
 	     } );
 	     gui.add( params, 'bloomStrength', 0.0, 10.0 ).onChange( function ( value ) {
-		 bloomPass.strength = Number( value );
+	      	 bloomPass.strength = Number( value );
 	     } );
 	     gui.add( params, 'bloomRadius', 0.0, 2.0 ).onChange( function ( value ) {
 		 bloomPass.radius = Number( value );
@@ -122,14 +126,14 @@
 	     
 	 }
 
-	 
+
 	 //////////////////////////////////////////////////////////////////////
 	 function render() {
 	     statsFPS.begin();
 	     composer.render();
 	     galaxy.update( camera );
 	     statsFPS.end();
-	     requestAnimationFrame(render);
+	     requestAnimationFrame( render );
 	 }
 
 
@@ -152,7 +156,6 @@
 
 
 	 //////////////////////////////////////////////////////////////////////
-	 // Listener for window size change
 	 window.addEventListener("resize", onWindowResize);
 	 function onWindowResize() {
 	     myCanvas.width = window.innerWidth;
@@ -162,7 +165,8 @@
 	     renderer.setSize(myCanvas.width, myCanvas.height);
 	 }
 
-
+	 
 	</script>
+
     </body>
 </html>
