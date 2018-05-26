@@ -144,7 +144,7 @@ function Galaxy( scene,
 	writeConsole( "Number of stars : " + self.starCount );
 	
 	generateAbsorptionClouds( self, 5e3, imgCloudMap, scene );
-	generateEmissionClouds( self, 1e4, imgCloudMap, scene );
+	//generateEmissionClouds( self, 5e4, imgCloudMap, scene );
 	
 	
 	generateGalaxPlane( self, scene );

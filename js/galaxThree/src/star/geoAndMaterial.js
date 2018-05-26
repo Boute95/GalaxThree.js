@@ -87,7 +87,7 @@ function getStarMaterial( texture, luminosity, maxStarLuminosity, color ) {
     } );
     
     mat.map = texture;
-    mat.uniforms[ 'size' ].value = 1 + ( luminosity * 2 / maxStarLuminosity );
+    mat.uniforms[ 'size' ].value = 2 + ( luminosity * 2 / maxStarLuminosity );
     mat.uniforms[ 'diffuse' ].value = new THREE.Color( color );
     mat.alphaTest = 0.6;
 

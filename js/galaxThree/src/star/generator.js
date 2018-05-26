@@ -1,6 +1,6 @@
 import { createStarGeoAndMaterials } from './geoAndMaterial.js';
 import { getImgDataArray } from '../utils.js';
-import { randomUniform, randomGauss } from '../proba.js';
+import { randomUniformSeeded, randomGaussSeeded } from '../proba.js';
 
 
 
@@ -35,7 +35,7 @@ function generateStars( galaxy, numberOfStars, img, scene ) {
 
 	for ( let starNb = 0 ; starNb < nbOfStarsForThisPixel ; ++starNb ) {
 	    
-	    let a = Math.random();    //< Determines which star category to select
+	    let a = randomUniformSeeded();    //< Determines which star category to select
 	    let sumProba = 0;
 	    let categoryIndex = 0;
 	    let starPlaced = false;
@@ -48,12 +48,12 @@ function generateStars( galaxy, numberOfStars, img, scene ) {
 		if ( a < sumProba ) {
 
 		    let starVertex = new THREE.Vector3();
-		    starVertex.x = randomUniform( worldXMin, worldXMax );
-		    starVertex.z = randomUniform( worldZMin, worldZMax );
-		    starVertex.y = randomGauss( 0, height / 3);
+		    starVertex.x = randomUniformSeeded( worldXMin, worldXMax );
+		    starVertex.z = randomUniformSeeded( worldZMin, worldZMax );
+		    starVertex.y = randomGaussSeeded( 0, height / 3 );
 
 		    let whichSpectralType = Math.floor(
-			randomUniform( 0, category.spectralTypes.length ) );
+			randomUniformSeeded( 0, category.spectralTypes.length ) );
 		    galaxy.arrayGeoAndMatStar[ categoryIndex ][ whichSpectralType ][ "geometry" ].
 			vertices.push( starVertex );
 		    galaxy.starCount += 1;
