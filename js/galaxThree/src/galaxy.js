@@ -39,7 +39,11 @@ function Galaxy( scene,
     // Array of geometry and material for each spectral type of each star category.
     this.arrayGeoAndMatStar = [ ];
 
-    this.starMeshes = [][];
+    this.starMeshes = [];
+
+    this.matrixChunks;
+
+    this.chunkWorldSize;
 
     // Displays the galaxy's texture camera gets farther from it.
     this.galaxyPlane;
@@ -134,6 +138,21 @@ function Galaxy( scene,
     // Private methods
     
     function init() {
+
+	// Matrix init
+	let dimMatrix = 100;
+	self.matrixChunks = new Array( dimMatrix );
+	for ( let e of self.matrixChunks ) {
+	    e = new Array( dimMatrix );
+	}
+
+	self.chunkWorldSize = ( self.radiusInKm * 2 ) / dimMatrix;
+
+	let chunksPerLuminosityUnit = 0.0001; //< Yet another magic number
+
+	for ( let c of arrayStarCategories ) {
+	    c.updateNbOfChunks( chunksPerLuminosityUnit, dimMatrix );
+	}
 	
 	self.starTexture = new THREE.TextureLoader().load( self.dirPath + 'resources/particle4.png' );
 
