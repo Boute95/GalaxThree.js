@@ -39,7 +39,7 @@ function Galaxy( scene,
     // Array of geometry and material for each spectral type of each star category.
     this.arrayGeoAndMatStar = [ ];
 
-    this.starMeshes = [ ];
+    this.starMeshes = [][];
 
     // Displays the galaxy's texture camera gets farther from it.
     this.galaxyPlane;
