@@ -4,7 +4,8 @@ import { randomGauss } from '../proba.js';
 
 
 
-function generateClouds( galaxy, materials, geometries, numberOfCloud, img, RGBChannel, scene ) {
+function generateClouds( galaxy, materials, geometries, numberOfCloud,
+			 img, RGBChannel, scene ) {
 
     // Takes the data from the image.
     let imgData = getImgDataArray( img );

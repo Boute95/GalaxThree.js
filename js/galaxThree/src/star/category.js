@@ -8,7 +8,8 @@ function StarCategory( name, spectralTypes, radius, luminosity, proba ) {
 }
 
 StarCategory.prototype.updateNbOfChunks = function( chunksPerLuminosityUnit, maxValue ) {
-    this.nbOfChunks = math.max( 1, Math.min( maxValue, this.luminosity * chunksPerLuminosityUnit ) );
+    this.nbOfChunks = Math.max( 1, Math.min(
+	maxValue, this.luminosity * chunksPerLuminosityUnit ) );
 }
 
 export { StarCategory };

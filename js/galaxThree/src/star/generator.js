@@ -1,4 +1,5 @@
 import { createStarGeoAndMaterials } from './geoAndMaterial.js';
+import { setProbaPerChunk } from './chunkProba.js';
 import { getImgDataArray } from '../utils.js';
 import { randomUniformSeeded, randomGaussSeeded } from '../proba.js';
 
@@ -9,10 +10,11 @@ function generateStars( galaxy, numberOfStars, img, scene ) {
 
     createStarGeoAndMaterials( galaxy );
 
-    
     let imgData = getImgDataArray( img );
     let nbOfStarsForAWhitePixel = getNbOfStarsWhitePixel( imgData, numberOfStars );
     let pixelSizeInWorldCoord = galaxy.radiusInKm * 2 / img.width;
+
+    setProbaPerChunk( imgData, galaxy.matrixChunks );
 
     
     // For each pixel of the map.
