@@ -1,4 +1,4 @@
-import { writeConsole } from './utils.js';
+import { writeConsole, getImgDataArray } from './utils.js';
 import { ly } from './consts.js';
 import { StarCategory } from './star/category.js';
 import { generateStars } from './star/generator.js';
@@ -36,8 +36,8 @@ function Galaxy( scene,
 
     this.starTexture;
 
-    // Array of geometry and material for each spectral type of each star category.
-    this.arrayGeoAndMatStar = [ ];
+    // Geometry and material for each spectral type of each star category.
+    this.arrayGeoAndMatStar = [];
 
     this.starMeshes = [];
 
@@ -45,7 +45,7 @@ function Galaxy( scene,
 
     this.chunkWorldSize;
 
-    // Displays the galaxy's texture camera gets farther from it.
+    // Displays the galaxy's texture when camera gets farther from it.
     this.galaxyPlane;
 
     this.arrayStarCategories = [
@@ -145,11 +145,10 @@ function Galaxy( scene,
 	for ( let i = 0 ; i < self.matrixChunks.length ; ++i ) {
 	    self.matrixChunks[i] = new Array( dimMatrix );
 	}
-
+	
 	self.chunkWorldSize = ( self.radiusInKm * 2 ) / dimMatrix;
 
 	let chunksPerLuminosityUnit = 0.0001; //< Yet another magic number
-
 	for ( let c of self.arrayStarCategories ) {
 	    c.updateNbOfChunks( chunksPerLuminosityUnit, dimMatrix );
 	}
