@@ -34,11 +34,6 @@ function Galaxy( scene,
 
     this.maxHeightInKm = maxHeightInLy * ly;
 
-    this.starTexture;
-
-    // Geometry and material for each spectral type of each star category.
-    this.arrayGeoAndMatStar = [];
-
     this.starMeshes = [];
 
     this.matrixChunks;
@@ -71,9 +66,7 @@ function Galaxy( scene,
 			 300.0,   600000.0,   0.000001),
     ];
 
-    this.maxStarLuminosity;
-    
-    this.spectralTypeToColor = {
+    this.arraySpectralTypeToColor = {
 	M : 0xFFCC6F,
 	K : 0xFFD2A1,
 	G : 0xFFF4EA,
@@ -153,12 +146,10 @@ function Galaxy( scene,
 	    c.updateNbOfChunks( chunksPerLuminosityUnit, dimMatrix );
 	}
 	
-	self.starTexture = new THREE.TextureLoader().load( self.dirPath + 'resources/particle4.png' );
+	let starTexture = new THREE.TextureLoader().load( self.dirPath + 'resources/particle4.png' );
 
-	self.maxStarLuminosity = Math.max.apply( Math, self.arrayStarCategories.map(
-	    function( o ) { return o.luminosity; } ) );
-	
-	generateStars( self, numberOfStars, imgStarMap, scene );
+	starGenerator = new StarGenerator( self, imgStarMap, starTexture, nbOfStars );
+	starGenerator.generateStars( new THREE.Vector3( 0, 0, 0 ) );
 	writeConsole( "Number of stars : " + self.starCount );
 	
 	generateAbsorptionClouds( self, 5e3, imgCloudMap, scene );

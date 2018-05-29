@@ -5,26 +5,36 @@ import { randomUniformSeeded, randomGaussSeeded } from '../proba.js';
 
 
 //////////////////////////////////////////////////////////////////////
-function StarGenerator( galaxy, imgStarMap, nbOfStars ) {
+function StarGenerator( galaxy, imgStarMap, starTexture, nbOfStars ) {
 
+    
     this.galaxy = galaxy;
+    
     this.imgStarData = getImgDataArray( imgStarMap );
+    
+    this.starTexture = starTexture;
+    
+    this.maxStarLuminosity = Math.max.apply( Math, galaxy.arrayStarCategories.map(
+	function( o ) { return o.luminosity; } ) );
+
+    this.maxChunkDistance = Math.max.apply( Math, galaxy.arrayStarCategories.map(
+	function( o ) { return o.nbOfChunks; } ) );
+
+    // Material for each spectral type of each star category.
+    this.arrayMaterialsStar = createMaterials( galaxy.arrayStarCategories,
+					       galaxy.arraySpectralTypeToColor
+					       starTexture,
+					       this.maxStarLuminosity, );
+
     this.nbOfStarsForAWhitePixel =
 	getNbOfStarsWhitePixel( this.imgStarData, nbOfStars );
 
-    createStarGeoAndMaterials( galaxy );
     
-}
-
-
-
-
-//////////////////////////////////////////////////////////////////////
-StarGenerator.prototype.init = function() {
-
-    setProbaPerChunk( this.imgData, this.galaxy.matrixChunks );
     
-}
+    setProbaPerChunk( starGen.imgData, starGen.galaxy.matrixChunks );
+
+    
+} // end StarGenerator
 
 
 
@@ -32,10 +42,36 @@ StarGenerator.prototype.init = function() {
 //////////////////////////////////////////////////////////////////////
 StarGenerator.prototype.generateStars = function( camPosition ) {
 
+    
     let camPosInMatrix = worldPosToMatrixPos( camPosition, this.galaxy.matrixChunks,
 					      this.galaxy.radiusInKm * 2 );
+
     
-}
+    for ( let i = 1 ; i < this.maxChunkDistance ; ++i ) {
+
+	for ( let category of this.galaxy.arrayStarCategories ) {
+
+	    if ( i <= category.nbOfChunks ) {
+
+		generateChunk( camPosInMatrix.x - i, camPosInMatrix.y );
+		generateChunk( camPosInMatrix.x - i, camPosInMatrix.y - i );
+		generateChunk( camPosInMatrix.x - i, camPosInMatrix.y + i );
+		generateChunk( camPosInMatrix.x,     camPosInMatrix.y + i );
+		generateChunk( camPosInMatrix.x,     camPosInMatrix.y - i );
+		generateChunk( camPosInMatrix.x + i, camPosInMatrix.y );
+		generateChunk( camPosInMatrix.x + i, camPosInMatrix.y - i );
+		generateChunk( camPosInMatrix.x + i, camPosInMatrix.y + i );
+		
+		
+	    }
+	    
+	} // end for each category
+	
+    } // end for i in [ 1..maxChunkDistance ]
+    
+    
+} // end generateStars method
+
 
 
 

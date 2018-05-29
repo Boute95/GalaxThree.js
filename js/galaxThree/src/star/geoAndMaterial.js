@@ -1,26 +1,28 @@
 import { ly } from '../consts.js';
 
 //////////////////////////////////////////////////////////////////////
-function createStarGeoAndMaterials( galaxy ) {
+function createMaterials( arrayStarCategories, arraySpectralTypeToColor,
+			  starTexture, maxStarLuminosity ) {
 
-    for ( let i = 0 ; i < galaxy.arrayStarCategories.length ; ++i ) {
+    let arrayMaterialsStar = new Array();
+    
+    for ( let i = 0 ; i < arrayStarCategories.length ; ++i ) {
 
-	let category = galaxy.arrayStarCategories[i];
-	galaxy.arrayGeoAndMatStar.push( new Array() );
+	let category = arrayStarCategories[i];
+	arrayMaterialsStar.push( new Array() );
 
 	for ( let spectralType of category.spectralTypes ) {
 
-	    galaxy.arrayGeoAndMatStar[i].push( {
-		geometry: new THREE.Geometry(),
-		material: getStarMaterial( galaxy.starTexture,
-					   category.luminosity,
-					   galaxy.maxStarLuminosity ,
-		    			   galaxy.spectralTypeToColor[ spectralType ], )
-	    } );
+	    arrayMaterialsStar[i].push(	getMaterial( starTexture,
+							 category.luminosity,
+							 maxStarLuminosity ,
+		    					 arraySpectralTypeToColor[spectralType] ) );
 	    
 	} // end for each spectral type of the category.
 	
     } // end for each category.
+
+    return arrayMaterialsStar;
 
 } // end method
 
@@ -28,7 +30,7 @@ function createStarGeoAndMaterials( galaxy ) {
 
 
 //////////////////////////////////////////////////////////////////////
-function getStarMaterial( texture, luminosity, maxStarLuminosity, color ) {
+function getMaterial( texture, luminosity, maxStarLuminosity, color ) {
     
     let pointShader = THREE.ShaderLib[ 'points' ];
     let basicShader = THREE.ShaderLib[ 'basic' ];
@@ -96,4 +98,4 @@ function getStarMaterial( texture, luminosity, maxStarLuminosity, color ) {
 } // end method
 
 
-export { createStarGeoAndMaterials };
+export { createMaterials };
