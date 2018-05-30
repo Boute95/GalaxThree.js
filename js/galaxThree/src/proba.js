@@ -1,7 +1,6 @@
-let theSeed = 1
 
-function random() {
-    let x = Math.sin( theSeed++ ) * 10000;
+function random( seed ) {
+    let x = Math.sin( seed ) * 10000;
     return x - Math.floor( x );
 }
 
@@ -15,8 +14,8 @@ function randomUniform( min = 0, max = 1 ) {
 
 
 
-function randomUniformSeeded( min = 0, max = 1 ) {
-    return random() * ( max - min ) + min;
+function randomUniformSeeded( seed, min = 0, max = 1 ) {
+    return random( seed ) * ( max - min ) + min;
 }
 
 
@@ -38,9 +37,9 @@ function randomGauss( mu = 0, sigma = 1 ) {
 /**
  * Generate a random number with normal distribution N(mu, sigma) 
  */
-function randomGaussSeeded( mu = 0, sigma = 1 ) {
-    let u = random();
-    let v = random();
+function randomGaussSeeded( seed, mu = 0, sigma = 1 ) {
+    let u = random( seed++ );
+    let v = random( seed );
     let Z = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2 * Math.PI * v );
     return Z * sigma + mu;
 }

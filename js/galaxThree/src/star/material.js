@@ -1,5 +1,7 @@
 import { ly } from '../consts.js';
 
+
+
 //////////////////////////////////////////////////////////////////////
 function createMaterials( arrayStarCategories, arraySpectralTypeToColor,
 			  starTexture, maxStarLuminosity ) {
@@ -14,9 +16,10 @@ function createMaterials( arrayStarCategories, arraySpectralTypeToColor,
 	for ( let spectralType of category.spectralTypes ) {
 
 	    arrayMaterialsStar[i].push(	getMaterial( starTexture,
-							 category.luminosity,
-							 maxStarLuminosity ,
-		    					 arraySpectralTypeToColor[spectralType] ) );
+						     category.luminosity,
+						     maxStarLuminosity ,
+		    				     arraySpectralTypeToColor[spectralType]
+						   ) );
 	    
 	} // end for each spectral type of the category.
 	

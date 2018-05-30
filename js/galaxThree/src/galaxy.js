@@ -1,10 +1,11 @@
 import { writeConsole, getImgDataArray } from './utils.js';
 import { ly } from './consts.js';
 import { StarCategory } from './star/category.js';
-import { generateStars } from './star/generator.js';
+import { StarGenerator } from './star/starGenerator.js';
 import { generateAbsorptionClouds } from './cloud/absorptionGenerator.js';
 import { generateEmissionClouds } from './cloud/emissionGenerator.js';
 import { generateGalaxPlane } from './plane.js';
+import { Chunk } from './star/chunk.js';
 
 
 
@@ -24,9 +25,13 @@ function Galaxy( scene,
     
     let self = this;
 
+    this.scene = scene;
+
     this.dirPath = galaxDirPath;
     
     this.starCount = 0;
+
+    this.nbOfMesh = 0;
     
     this.radiusInKm = radiusInLy * ly;
     
@@ -133,26 +138,31 @@ function Galaxy( scene,
     function init() {
 
 	// Matrix init
-	let dimMatrix = 64; //< Should be a power of 2 of img size.
+	let dimMatrix = 32; //< Should be a power of 2 of img size.
 	self.matrixChunks = new Array( dimMatrix );
 	for ( let i = 0 ; i < self.matrixChunks.length ; ++i ) {
 	    self.matrixChunks[i] = new Array( dimMatrix );
+	    for ( let j = 0 ; j < self.matrixChunks[i].length ; ++j ) {
+		self.matrixChunks[i][j] = new Chunk();
+	    }
 	}
 	
 	self.chunkWorldSize = ( self.radiusInKm * 2 ) / dimMatrix;
 
-	let chunksPerLuminosityUnit = 0.0001; //< Yet another magic number
+	let chunksPerLuminosityUnit = 0.00001; //< Yet another magic number
 	for ( let c of self.arrayStarCategories ) {
 	    c.updateNbOfChunks( chunksPerLuminosityUnit, dimMatrix );
 	}
 	
-	let starTexture = new THREE.TextureLoader().load( self.dirPath + 'resources/particle4.png' );
+	let starTexture = new THREE.TextureLoader().load( self.dirPath +
+							  'resources/particle4.png' );
 
-	starGenerator = new StarGenerator( self, imgStarMap, starTexture, nbOfStars );
+	let starGenerator = new StarGenerator( self, imgStarMap, starTexture,
+					       numberOfStars );
 	starGenerator.generateStars( new THREE.Vector3( 0, 0, 0 ) );
 	writeConsole( "Number of stars : " + self.starCount );
 	
-	generateAbsorptionClouds( self, 5e3, imgCloudMap, scene );
+	//generateAbsorptionClouds( self, 5e3, imgCloudMap, scene );
 	//generateEmissionClouds( self, 5e4, imgCloudMap, scene );
 	
 	

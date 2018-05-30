@@ -1,4 +1,25 @@
-import { writeConsole } from '../utils.js';
+function Chunk() {
+
+    this.proba;
+    this.arrayMeshes = [];
+    
+}
+
+
+
+
+Chunk.prototype.removeStars = function( scene ) {
+
+    for ( let mesh of this.arrayMeshes ) {
+	scene.remove( mesh );
+    }
+
+    this.arrayMeshes = new Array();
+    
+}
+
+
+
 
 function setProbaPerChunk( imgData, matrixChunks ) {
 
@@ -22,10 +43,11 @@ function setProbaPerChunk( imgData, matrixChunks ) {
     for ( let i = 0 ; i < matrixChunks.length ; ++i ) {
 	for ( let j = 0 ; j < matrixChunks[i].length ; ++j ) {
 	    let indiceImg = ( j + matrixChunks.length * i ) * 4 * pixelPerChunk;
-	    matrixChunks[i][j] = imgData.data[ indiceImg ] / 255.0;
+	    matrixChunks[i][j].proba = imgData.data[ indiceImg ] / 255.0;
 	}
     }
 
 }
 
-export { setProbaPerChunk };
+
+export { Chunk, setProbaPerChunk };

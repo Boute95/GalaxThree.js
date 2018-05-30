@@ -1,3 +1,6 @@
+import { writeConsole } from '../utils.js';
+
+
 function StarCategory( name, spectralTypes, radius, luminosity, proba ) {
     
     this.name = name;
@@ -16,6 +19,8 @@ StarCategory.prototype.updateNbOfChunks = function( chunksPerLuminosityUnit, max
     
     this.nbOfChunks = Math.max( 1, Math.min(
 	maxValue, this.luminosity * chunksPerLuminosityUnit ) );
+    
+    writeConsole( "Chunk distance for " + this.name + " : " + this.nbOfChunks );
     
 }
 
