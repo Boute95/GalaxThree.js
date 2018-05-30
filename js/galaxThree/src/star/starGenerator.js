@@ -1,3 +1,4 @@
+import { ly } from '../consts.js';
 import { createMaterials } from './material.js';
 import { setProbaPerChunk } from './chunk.js';
 import { writeConsole, getImgDataArray } from '../utils.js';
@@ -61,13 +62,15 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 	for ( let catIndex = 0 ; catIndex < this.galaxy.arrayStarCategories.length ;
 	      ++catIndex ) {
 
+	    this.generateChunk( catIndex, posMatrix.x, posMatrix.y );
+
 	    if ( i <= this.galaxy.arrayStarCategories[ catIndex ].nbOfChunks ) {
 
-		if ( posMatrix.x - i > 0 ) {
+		if ( posMatrix.x - i >= 0 ) {
 		    
 		    this.generateChunk( catIndex, posMatrix.x - i, posMatrix.y );
 		    
-		    if ( posMatrix.y - i > 0 ) {
+		    if ( posMatrix.y - i >= 0 ) {
 			this.generateChunk( catIndex, posMatrix.x - i, posMatrix.y - i );
 		    }
 
@@ -81,7 +84,7 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 		    this.generateChunk( catIndex, posMatrix.x, posMatrix.y + i );
 		}
 
-		if ( posMatrix.y - i > 0 ) {
+		if ( posMatrix.y - i >= 0 ) {
 		    this.generateChunk( catIndex, posMatrix.x, posMatrix.y - i );
 		}
 		
@@ -89,7 +92,7 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 		    
 		    this.generateChunk( catIndex, posMatrix.x + i, posMatrix.y );
 
-		    if ( posMatrix.y - i > 0 ) {
+		    if ( posMatrix.y - i >= 0 ) {
 			this.generateChunk( catIndex, posMatrix.x + i, posMatrix.y - i );
 		    }
 
@@ -134,10 +137,12 @@ StarGenerator.prototype.generateChunk = function( categoryIndex, matrixX, matrix
 				     this.galaxy.chunkWorldSize );
 
     let worldXMin = worldPos.x;
-    let worldXMax = worldPos.x * this.galaxy.chunkWorldSize;
+    let worldXMax = worldPos.x + this.galaxy.chunkWorldSize;
     let worldZMin = worldPos.y;
-    let worldZMax = worldPos.y * this.galaxy.chunkWorldSize;
+    let worldZMax = worldPos.y + this.galaxy.chunkWorldSize;
     let height = this.galaxy.heightInKm;
+
+    writeConsole( worldXMin / ly + " " +  worldXMax / ly );
     
     
     for ( let i = 0 ; i < nbOfStarsThisChunk ; ++i ) {
