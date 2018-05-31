@@ -1,3 +1,5 @@
+import { writeConsole } from '../utils.js';
+
 function Chunk() {
 
     this.proba;
@@ -29,25 +31,32 @@ function setProbaPerChunk( imgData, matrixChunks ) {
     let i = 0;
     while ( i < imgData.data.length && maxColor <= 255 ) {
 	if ( imgData.data[i] > maxColor ) {
-	    maxColor = imgData[i];
+	    maxColor = imgData.data[i];
 	}
 	i += 4;
     }
-
     
-    let pixelPerChunk =  ( imgData.data.length / 4 ) /
-	( matrixChunks.length * matrixChunks.length );
+    let imgWidth = Math.sqrt( imgData.data.length / 4 );
+    let nbOfPixelsByChunkWidth = imgWidth / matrixChunks.length;
 
-    
     // Sets probability for each chunks
     for ( let i = 0 ; i < matrixChunks.length ; ++i ) {
 	for ( let j = 0 ; j < matrixChunks[i].length ; ++j ) {
-	    let indiceImg = ( j + matrixChunks.length * i ) * 4 * pixelPerChunk;
-	    matrixChunks[i][j].proba = imgData.data[ indiceImg ] / 255.0;
+	    let imgCoord = matrixToImgCoord( j, i, nbOfPixelsByChunkWidth );
+	    let imgIndex = ( imgCoord.y * imgWidth + imgCoord.x ) * 4;
+	    matrixChunks[i][j].proba = imgData.data[ imgIndex ] / 255.0;
+	    writeConsole( '[' + i + ',' + j + '] : ' + matrixChunks[i][j].proba ) ;
 	}
     }
 
 }
 
+
+function matrixToImgCoord( matrixX, matrixY, nbOfPixelsByChunkWidth ) {
+    return {
+	x: matrixX * nbOfPixelsByChunkWidth,
+	y: matrixY * nbOfPixelsByChunkWidth,
+    }
+}
 
 export { Chunk, setProbaPerChunk };

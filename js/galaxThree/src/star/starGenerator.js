@@ -54,7 +54,7 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 
     let matrixSize = this.galaxy.matrixChunks.length;
     let posMatrix = worldPosToMatrixPos( camPosition, this.galaxy.matrixChunks,
-					      this.galaxy.radiusInKm * 2 );
+					 this.galaxy.radiusInKm * 2 );
 
     for ( let i = 0 ; i < this.maxChunkDistance ; ++i ) {
 
@@ -62,7 +62,7 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 	      ++catIndex ) {
 
 	    if ( i == 0 ) {
-		    this.generateChunk( catIndex, posMatrix.x, posMatrix.y );
+		this.generateChunk( catIndex, posMatrix.x, posMatrix.y );
 	    }
 
 	    else {
@@ -132,10 +132,11 @@ StarGenerator.prototype.generateChunk = function( categoryIndex, matrixX, matrix
     let theChunk = this.galaxy.matrixChunks[ matrixY ][ matrixX ];
     
     let chunkProba = theChunk.proba;
+    //writeConsole( chunkProba );
     let nbOfStarsThisChunk = this.maxStarForAChunk * chunkProba * category.proba;
 
-     writeConsole( "Generating " + nbOfStarsThisChunk + " stars in [ " + matrixY + " "
-		  + matrixX + " ]" );
+   //  writeConsole( "Generating " + 0 + " stars in [" + matrixY + ","
+	//+ matrixX + "]" );
 
     let worldPos = matrixToWorldPos( { x: matrixX, y: matrixY },
 				     this.galaxy.matrixChunks.length,
@@ -147,7 +148,7 @@ StarGenerator.prototype.generateChunk = function( categoryIndex, matrixX, matrix
     let worldZMax = worldPos.y + this.galaxy.chunkWorldSize;
     let height = this.galaxy.heightInKm;
 
-    writeConsole( worldXMin / ly + " " +  worldXMax / ly );
+    //writeConsole( worldXMin / ly + " " +  worldXMax / ly );
     
     
     for ( let i = 0 ; i < nbOfStarsThisChunk ; ++i ) {
@@ -199,9 +200,9 @@ function getNbOfStarsWhitePixel( imgData, nbOfStars ) {
 
     let S = 0;
     for ( let i = 0 ; i < imgData.data.length ; i+=4 ) {
-	S += imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2];
+	S += imgData.data[i];
     }
-    return ( nbOfStars / S ) * 255;
+    return ( nbOfStars / S );
     
 }
 
