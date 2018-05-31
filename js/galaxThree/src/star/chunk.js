@@ -1,5 +1,7 @@
 import { writeConsole } from '../utils.js';
 
+
+//////////////////////////////////////////////////////////////////////
 function Chunk() {
 
     this.proba;
@@ -9,7 +11,7 @@ function Chunk() {
 
 
 
-
+//////////////////////////////////////////////////////////////////////
 Chunk.prototype.removeStars = function( scene ) {
 
     for ( let mesh of this.arrayMeshes ) {
@@ -22,7 +24,7 @@ Chunk.prototype.removeStars = function( scene ) {
 
 
 
-
+//////////////////////////////////////////////////////////////////////
 function setProbaPerChunk( imgData, matrixChunks ) {
 
     let maxColor = 0;
@@ -45,18 +47,23 @@ function setProbaPerChunk( imgData, matrixChunks ) {
 	    let imgCoord = matrixToImgCoord( j, i, nbOfPixelsByChunkWidth );
 	    let imgIndex = ( imgCoord.y * imgWidth + imgCoord.x ) * 4;
 	    matrixChunks[i][j].proba = imgData.data[ imgIndex ] / 255.0;
-	    writeConsole( '[' + i + ',' + j + '] : ' + matrixChunks[i][j].proba ) ;
 	}
     }
 
 }
 
 
+
+
+//////////////////////////////////////////////////////////////////////
 function matrixToImgCoord( matrixX, matrixY, nbOfPixelsByChunkWidth ) {
     return {
 	x: matrixX * nbOfPixelsByChunkWidth,
 	y: matrixY * nbOfPixelsByChunkWidth,
     }
 }
+
+
+
 
 export { Chunk, setProbaPerChunk };

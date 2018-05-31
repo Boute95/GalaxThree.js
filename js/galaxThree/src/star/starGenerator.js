@@ -56,63 +56,31 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
     let posMatrix = worldPosToMatrixPos( camPosition, this.galaxy.matrixChunks,
 					 this.galaxy.radiusInKm * 2 );
 
-    for ( let i = 0 ; i < this.maxChunkDistance ; ++i ) {
+    for ( let x = posMatrix.x - this.maxChunkDistance ;
+	  x < posMatrix.x + this.maxChunkDistance ; ++x ) {
 
-	for ( let catIndex = 0 ; catIndex < this.galaxy.arrayStarCategories.length ;
-	      ++catIndex ) {
+	for ( let y = posMatrix.y - this.maxChunkDistance ;
+	      y < posMatrix.y + this.maxChunkDistance ; ++y ) {
+	
+	    for ( let catIndex = 0 ; catIndex < this.galaxy.arrayStarCategories.length ;
+		  ++catIndex ) {
 
-	    if ( i == 0 ) {
-		this.generateChunk( catIndex, posMatrix.x, posMatrix.y );
-	    }
+		let nbOfChunks = this.galaxy.arrayStarCategories[ catIndex ].nbOfChunks;
 
-	    else {
-
-		if ( i <= this.galaxy.arrayStarCategories[ catIndex ].nbOfChunks ) {
-
-		    if ( posMatrix.x - i >= 0 ) {
-			
-			this.generateChunk( catIndex, posMatrix.x - i, posMatrix.y );
-			
-			if ( posMatrix.y - i >= 0 ) {
-			    this.generateChunk( catIndex, posMatrix.x - i, posMatrix.y - i );
-			}
-
-			if ( posMatrix.y + i < matrixSize ) {
-			    this.generateChunk( catIndex, posMatrix.x - i, posMatrix.y + i );
-			}
-			
-		    }
-
-		    if ( posMatrix.y + i < matrixSize ) {
-			this.generateChunk( catIndex, posMatrix.x, posMatrix.y + i );
-		    }
-
-		    if ( posMatrix.y - i >= 0 ) {
-			this.generateChunk( catIndex, posMatrix.x, posMatrix.y - i );
-		    }
+		if ( x >= 0 && y >= 0 && x < matrixSize && y < matrixSize &&
+		     Math.abs( x - posMatrix.x ) <= nbOfChunks &&
+		     Math.abs( y - posMatrix.y ) <= nbOfChunks ) {
 		    
-		    if ( posMatrix.x + i < matrixSize ) {
-			
-			this.generateChunk( catIndex, posMatrix.x + i, posMatrix.y );
-
-			if ( posMatrix.y - i >= 0 ) {
-			    this.generateChunk( catIndex, posMatrix.x + i, posMatrix.y - i );
-			}
-
-			if ( posMatrix.y + i < matrixSize ) {
-			    this.generateChunk( catIndex, posMatrix.x + i, posMatrix.y + i );
-			}
-			
-		    }
-
+		    this.generateChunk( catIndex, x, y );
+		    
 		}
-		
+
 	    }
 	    
-	} // end for each category
+	}
 	
-    } // end for i in [ 1..maxChunkDistance ]
-
+    } 
+    
     writeConsole( "Number of mesh : " + this.galaxy.nbOfMesh );
     
     
