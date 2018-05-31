@@ -1,6 +1,6 @@
 
 function random( seed ) {
-    let x = Math.sin( seed ) * 10000;
+    let x = Math.sin( seed ) * 10000000;
     return x - Math.floor( x );
 }
 

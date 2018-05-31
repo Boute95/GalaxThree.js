@@ -142,11 +142,10 @@ StarGenerator.prototype.generateChunk = function( categoryIndex, matrixX, matrix
 	    - this.galaxy.radiusInKm;
 	let height = this.galaxy.heightInKm + imgData.data[i + 1] / 255.0
 	    * ( this.galaxy.maxHeightInKm - this.galaxy.heightInKm );
-	if ( i==0 ) writeConsole( height );
 
 	for ( let starNb = 0 ; starNb < nbOfStarsForThisPixel ; ++starNb ) {
 	    
-	    let a = randomUniformSeeded( ++seed, 0, 1 );    //< Determines which star category to select
+	    let a = randomUniformSeeded( seed++, 0, 1 );    //< Determines which star category to select
 
 	    if ( a < theCategory.proba ) {
 
@@ -156,7 +155,7 @@ StarGenerator.prototype.generateChunk = function( categoryIndex, matrixX, matrix
 		starVertex.y = randomGaussSeeded( ++seed, 0, height / 3 );
 
 		let whichSpectralType = Math.floor(
-		    randomUniformSeeded( ++seed, 0, category.spectralTypes.length ) );
+		    randomUniformSeeded( seed, 0, category.spectralTypes.length ) );
 		this.arrayGeometriesStar[categoryIndex][whichSpectralType].vertices.push(
 		    starVertex );
 		this.galaxy.starCount += 1;

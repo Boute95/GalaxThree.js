@@ -1,14 +1,15 @@
 import { writeConsole } from '../utils.js';
 
 
-function StarCategory( name, spectralTypes, radius, luminosity, proba ) {
+function StarCategory( name, spectralTypes, radius, luminosity, proba, nbOfChunks ) {
     
     this.name = name;
     this.spectralTypes = spectralTypes;
     this.radius = radius;
     this.luminosity = luminosity;
     this.proba = proba;
-    this.nbOfChunks = 1; //< Nb of chunks from the camera's position where we'll generate stars
+    // Nb of chunks from the camera's position where we'll generate stars
+    this.nbOfChunks = nbOfChunks; 
     
 }
 

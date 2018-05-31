@@ -6,6 +6,7 @@ import { generateAbsorptionClouds } from './cloud/absorptionGenerator.js';
 import { generateEmissionClouds } from './cloud/emissionGenerator.js';
 import { generateGalaxPlane } from './plane.js';
 import { Chunk } from './star/chunk.js';
+import { randomUniformSeeded, randomGaussSeeded } from './proba.js';
 
 
 
@@ -49,26 +50,26 @@ function Galaxy( scene,
     this.galaxyPlane;
 
     this.arrayStarCategories = [
-	// new StarCategory("MS_M",["M"],
-	// 		 0.3,     0.01,       0.8),
+	 new StarCategory("MS_M",["M"],
+	 		  0.3,     0.01,       0.8,     1),
 	new StarCategory("MS_K",["K"],
-			 0.8,     0.2,        0.08),
+			 0.8,     0.2,        0.08,     1),
 	new StarCategory("MS_G",["G"],
-			 1.0,     1.0,        0.035),
+			 1.0,     1.0,        0.035,    1),
 	new StarCategory("MS_F",["F"],
-			 1.3,     4.0,        0.02),
+			 1.3,     4.0,        0.02,     1),
 	new StarCategory("MS_A",["A"],
-			 1.7,     20.0,       0.007),
+			 1.7,     20.0,       0.007,    1),
 	new StarCategory("MS_B",["B"],
-			 5.0,     1000,       0.001),
+			 5.0,     1000,       0.001,    2),
 	new StarCategory("MS_O",["O"],
-			 10.0,    100000.0,   0.0000001),
+			 10.0,    100000.0,   0.0000001,6),
 	new StarCategory("G",   ["G","K","M"],
-			 30.0,    600.0,      0.004),
+			 30.0,    600.0,      0.004,    2),
 	new StarCategory("WD",  ["D"],
-			 0.01,    0.01,       0.05),
+			 0.01,    0.01,       0.05,     1),
 	new StarCategory("SG",  ["O","B","A","F","G","K","M"],
-			 300.0,   600000.0,   0.000001),
+			 300.0,   600000.0,   0.000001, 6),
     ];
 
     this.arraySpectralTypeToColor = {
@@ -138,7 +139,7 @@ function Galaxy( scene,
     function init() {
 
 	// Matrix init
-	let dimMatrix = 16; //< Should be a power of 2 of img size.
+	let dimMatrix = 256; //< Should be a power of 2 of img size.
 	self.matrixChunks = new Array( dimMatrix );
 	for ( let i = 0 ; i < self.matrixChunks.length ; ++i ) {
 	    self.matrixChunks[i] = new Array( dimMatrix );
@@ -149,10 +150,10 @@ function Galaxy( scene,
 	
 	self.chunkWorldSize = ( self.radiusInKm * 2 ) / dimMatrix;
 
-	let chunksPerLuminosityUnit = 0.001; //< Yet another magic number
-	for ( let c of self.arrayStarCategories ) {
-	    c.updateNbOfChunks( chunksPerLuminosityUnit, dimMatrix );
-	}
+	// let chunksPerLuminosityUnit = 0.001; //< Yet another magic number
+	// for ( let c of self.arrayStarCategories ) {
+	//     c.updateNbOfChunks( chunksPerLuminosityUnit, dimMatrix );
+	// }
 	
 	let starTexture = new THREE.TextureLoader().load( self.dirPath +
 							  'resources/particle4.png' );
