@@ -67,9 +67,9 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 
 		let nbOfChunks = this.galaxy.arrayStarCategories[ catIndex ].nbOfChunks;
 
-		if ( x >= 0 && y >= 0 && x < matrixSize && y < matrixSize &&
-		     Math.abs( x - posMatrix.x ) <= nbOfChunks &&
-		     Math.abs( y - posMatrix.y ) <= nbOfChunks ) {
+		if ( Math.abs( x - posMatrix.x ) <= nbOfChunks &&
+		     Math.abs( y - posMatrix.y ) <= nbOfChunks &&
+		     x >= 0 && y >= 0 && x < matrixSize && y < matrixSize ) {
 		    
 		    this.generateChunk( catIndex, x, y );
 		    
@@ -79,7 +79,19 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 	    
 	}
 	
-    } 
+    }
+
+    // Adds stars to the scene.
+    for ( let i = 0 ; i < this.arrayGeometriesStar.length ; ++i ) {
+	for ( let j = 0 ; j < this.arrayGeometriesStar[i].length ; ++j ) {
+	    if ( this.arrayGeometriesStar[i][j].vertices.length > 0 ) {
+		let mesh = new THREE.Points( this.arrayGeometriesStar[i][j],
+					     this.arrayMaterialsStar[i][j] );
+		this.galaxy.scene.add( mesh );
+		this.galaxy.nbOfMesh += 1;
+	    }
+	}
+    }
     
     writeConsole( "Number of mesh : " + this.galaxy.nbOfMesh );
     
@@ -134,17 +146,6 @@ StarGenerator.prototype.generateChunk = function( categoryIndex, matrixX, matrix
 	
     } // end for
 
-    
-    // Adds stars to the scene.
-    for ( let i = 0 ; i < this.arrayGeometriesStar[categoryIndex].length ; ++i ) {
-	if ( this.arrayGeometriesStar[categoryIndex][i].vertices.length > 0 ) {
-	    let mesh = new THREE.Points( this.arrayGeometriesStar[categoryIndex][i],
-					 this.arrayMaterialsStar[categoryIndex][i] );
-	    this.galaxy.scene.add( mesh );
-	    this.galaxy.nbOfMesh += 1;
-	}
-    }
-    
     
 } // end method
 

@@ -149,7 +149,7 @@ function Galaxy( scene,
 	
 	self.chunkWorldSize = ( self.radiusInKm * 2 ) / dimMatrix;
 
-	let chunksPerLuminosityUnit = 0.00001; //< Yet another magic number
+	let chunksPerLuminosityUnit = 0.0001; //< Yet another magic number
 	for ( let c of self.arrayStarCategories ) {
 	    c.updateNbOfChunks( chunksPerLuminosityUnit, dimMatrix );
 	}
