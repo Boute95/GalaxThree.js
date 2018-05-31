@@ -56,50 +56,55 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
     let posMatrix = worldPosToMatrixPos( camPosition, this.galaxy.matrixChunks,
 					      this.galaxy.radiusInKm * 2 );
 
-    
-    for ( let i = 1 ; i < this.maxChunkDistance ; ++i ) {
+    for ( let i = 0 ; i < this.maxChunkDistance ; ++i ) {
 
 	for ( let catIndex = 0 ; catIndex < this.galaxy.arrayStarCategories.length ;
 	      ++catIndex ) {
 
-	    this.generateChunk( catIndex, posMatrix.x, posMatrix.y );
+	    if ( i == 0 ) {
+		    this.generateChunk( catIndex, posMatrix.x, posMatrix.y );
+	    }
 
-	    if ( i <= this.galaxy.arrayStarCategories[ catIndex ].nbOfChunks ) {
+	    else {
 
-		if ( posMatrix.x - i >= 0 ) {
-		    
-		    this.generateChunk( catIndex, posMatrix.x - i, posMatrix.y );
-		    
-		    if ( posMatrix.y - i >= 0 ) {
-			this.generateChunk( catIndex, posMatrix.x - i, posMatrix.y - i );
+		if ( i <= this.galaxy.arrayStarCategories[ catIndex ].nbOfChunks ) {
+
+		    if ( posMatrix.x - i >= 0 ) {
+			
+			this.generateChunk( catIndex, posMatrix.x - i, posMatrix.y );
+			
+			if ( posMatrix.y - i >= 0 ) {
+			    this.generateChunk( catIndex, posMatrix.x - i, posMatrix.y - i );
+			}
+
+			if ( posMatrix.y + i < matrixSize ) {
+			    this.generateChunk( catIndex, posMatrix.x - i, posMatrix.y + i );
+			}
+			
 		    }
 
 		    if ( posMatrix.y + i < matrixSize ) {
-			this.generateChunk( catIndex, posMatrix.x - i, posMatrix.y + i );
+			this.generateChunk( catIndex, posMatrix.x, posMatrix.y + i );
 		    }
-		    
-		}
-
-		if ( posMatrix.y + i < matrixSize ) {
-		    this.generateChunk( catIndex, posMatrix.x, posMatrix.y + i );
-		}
-
-		if ( posMatrix.y - i >= 0 ) {
-		    this.generateChunk( catIndex, posMatrix.x, posMatrix.y - i );
-		}
-		
-		if ( posMatrix.x + i < matrixSize ) {
-		    
-		    this.generateChunk( catIndex, posMatrix.x + i, posMatrix.y );
 
 		    if ( posMatrix.y - i >= 0 ) {
-			this.generateChunk( catIndex, posMatrix.x + i, posMatrix.y - i );
-		    }
-
-		    if ( posMatrix.y + i < matrixSize ) {
-			this.generateChunk( catIndex, posMatrix.x + i, posMatrix.y + i );
+			this.generateChunk( catIndex, posMatrix.x, posMatrix.y - i );
 		    }
 		    
+		    if ( posMatrix.x + i < matrixSize ) {
+			
+			this.generateChunk( catIndex, posMatrix.x + i, posMatrix.y );
+
+			if ( posMatrix.y - i >= 0 ) {
+			    this.generateChunk( catIndex, posMatrix.x + i, posMatrix.y - i );
+			}
+
+			if ( posMatrix.y + i < matrixSize ) {
+			    this.generateChunk( catIndex, posMatrix.x + i, posMatrix.y + i );
+			}
+			
+		    }
+
 		}
 		
 	    }
