@@ -10,6 +10,8 @@ function StarGenerator( galaxy, imgStarMap, starTexture, nbOfStars ) {
 
     
     this.galaxy = galaxy;
+
+    this.imgMap = imgStarMap;
     
     this.imgStarData = getImgDataArray( imgStarMap );
     
@@ -35,6 +37,12 @@ function StarGenerator( galaxy, imgStarMap, starTexture, nbOfStars ) {
 	}
     }
 
+    this.nbOfStarsForAWhitePixel = getNbOfStarsWhitePixel( this.imgStarData, nbOfStars );
+
+    this.pixelSizeInWorldCoord = galaxy.radiusInKm * 2 / imgStarMap.width;
+
+    this.nbPixelForAChunkWidth = imgStarMap.width / this.galaxy.matrixChunks.length;
+		  
     this.maxStarForAChunk = getMaxStarChunk( this.imgStarData, nbOfStars,
 					     this.galaxy.matrixChunks.length );
 
@@ -107,46 +115,59 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 //////////////////////////////////////////////////////////////////////
 StarGenerator.prototype.generateChunk = function( categoryIndex, matrixX, matrixY ) {
 
+    
     let seed = matrixX + matrixY * this.galaxy.matrixChunks.length;
     let category = this.galaxy.arrayStarCategories[ categoryIndex ];
-    let theChunk = this.galaxy.matrixChunks[ matrixY ][ matrixX ];
-    
-    let chunkProba = theChunk.proba;
-    //writeConsole( chunkProba );
-    let nbOfStarsThisChunk = this.maxStarForAChunk * chunkProba * category.proba;
+    let imgPos = matrixToImgPos( { x: matrixX, y: matrixY },
+				 this.galaxy.matrixChunks.length, this.imgMap.width );
+    let imgData = getImgDataArray( this.imgMap, imgPos.x, imgPos.y,
+				   this.nbPixelForAChunkWidth, this.nbPixelForAChunkWidth );
+    let theCategory = this.galaxy.arrayStarCategories[ categoryIndex ];
 
-   //  writeConsole( "Generating " + 0 + " stars in [" + matrixY + ","
-	//+ matrixX + "]" );
 
-    let worldPos = matrixToWorldPos( { x: matrixX, y: matrixY },
-				     this.galaxy.matrixChunks.length,
-				     this.galaxy.chunkWorldSize );
+    // For each pixel of the chunk.
+    for ( let i = 0 ; i < imgData.data.length ; i += 4 ) {
 
-    let worldXMin = worldPos.x;
-    let worldXMax = worldPos.x + this.galaxy.chunkWorldSize;
-    let worldZMin = worldPos.y;
-    let worldZMax = worldPos.y + this.galaxy.chunkWorldSize;
-    let height = this.galaxy.heightInKm;
+	let nbOfStarsForThisPixel =
+	    this.nbOfStarsForAWhitePixel * ( imgData.data[i] / 255.0 );
+	let pixelX = imgPos.x + ( i / 4 ) % this.nbPixelForAChunkWidth;
+	let pixelY = imgPos.y + Math.floor( ( i / 4 ) / this.nbPixelForAChunkWidth );
+	let worldXMin = pixelX * this.pixelSizeInWorldCoord - this.pixelSizeInWorldCoord / 2
+	    - this.galaxy.radiusInKm;
+	let worldXMax = pixelX * this.pixelSizeInWorldCoord + this.pixelSizeInWorldCoord / 2
+	    - this.galaxy.radiusInKm;
+	let worldZMin = pixelY * this.pixelSizeInWorldCoord - this.pixelSizeInWorldCoord / 2
+	    - this.galaxy.radiusInKm;
+	let worldZMax = pixelY * this.pixelSizeInWorldCoord + this.pixelSizeInWorldCoord / 2
+	    - this.galaxy.radiusInKm;
+	let height = this.galaxy.heightInKm + imgData.data[i + 1] / 255.0
+	    * ( this.galaxy.maxHeightInKm - this.galaxy.heightInKm );
+	if ( i==0 ) writeConsole( height );
 
-    //writeConsole( worldXMin / ly + " " +  worldXMax / ly );
-    
-    
-    for ( let i = 0 ; i < nbOfStarsThisChunk ; ++i ) {
+	for ( let starNb = 0 ; starNb < nbOfStarsForThisPixel ; ++starNb ) {
+	    
+	    let a = randomUniformSeeded( ++seed, 0, 1 );    //< Determines which star category to select
+
+	    if ( a < theCategory.proba ) {
+
+		let starVertex = new THREE.Vector3();
+		starVertex.x = randomUniformSeeded( ++seed, worldXMin, worldXMax );
+		starVertex.z = randomUniformSeeded( ++seed, worldZMin, worldZMax );
+		starVertex.y = randomGaussSeeded( ++seed, 0, height / 3 );
+
+		let whichSpectralType = Math.floor(
+		    randomUniformSeeded( ++seed, 0, category.spectralTypes.length ) );
+		this.arrayGeometriesStar[categoryIndex][whichSpectralType].vertices.push(
+		    starVertex );
+		this.galaxy.starCount += 1;
+		
+	    }
+		
+	} // end for each star of this pixel.
 	
-	let starVertex = new THREE.Vector3();
-	starVertex.x = randomUniformSeeded( ++seed, worldXMin, worldXMax );
-	starVertex.z = randomUniformSeeded( ++seed, worldZMin, worldZMax );
-	starVertex.y = randomGaussSeeded( ++seed, 0, height / 3 );
-
-	let whichSpectralType = Math.floor(
-	    randomUniformSeeded( ++seed, 0, category.spectralTypes.length ) );
-	this.arrayGeometriesStar[categoryIndex][whichSpectralType].vertices.push(
-	    starVertex );
-	this.galaxy.starCount += 1;
-	
-    } // end for
-
+    } // end for each pixel of the chunk.
     
+	
 } // end method
 
 
@@ -221,6 +242,27 @@ function matrixToWorldPos( matrixPos, matrixSize, chunkWorldSize ) {
 
 }
 
+
+
+
+
+//////////////////////////////////////////////////////////////////////
+/**
+ * Matrix must be square !
+ */
+function matrixToImgPos( matrixPos, matrixSize, imgWidth ) {
+
+    let coef = imgWidth / matrixSize;
+    
+    return {
+	x: matrixPos.x * coef,
+	y: matrixPos.y * coef,
+    }
+
+}
+
+
+    
 
 
 

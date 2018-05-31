@@ -4,8 +4,7 @@ import { writeConsole } from '../utils.js';
 //////////////////////////////////////////////////////////////////////
 function Chunk() {
 
-    this.proba;
-    this.arrayMeshes = [];
+    
     
 }
 

@@ -138,7 +138,7 @@ function Galaxy( scene,
     function init() {
 
 	// Matrix init
-	let dimMatrix = 32; //< Should be a power of 2 of img size.
+	let dimMatrix = 16; //< Should be a power of 2 of img size.
 	self.matrixChunks = new Array( dimMatrix );
 	for ( let i = 0 ; i < self.matrixChunks.length ; ++i ) {
 	    self.matrixChunks[i] = new Array( dimMatrix );
@@ -149,7 +149,7 @@ function Galaxy( scene,
 	
 	self.chunkWorldSize = ( self.radiusInKm * 2 ) / dimMatrix;
 
-	let chunksPerLuminosityUnit = 0.0001; //< Yet another magic number
+	let chunksPerLuminosityUnit = 0.001; //< Yet another magic number
 	for ( let c of self.arrayStarCategories ) {
 	    c.updateNbOfChunks( chunksPerLuminosityUnit, dimMatrix );
 	}

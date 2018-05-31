@@ -1,5 +1,11 @@
-function getImgDataArray( img ) {
+function getImgDataArray( img, x, y, width, height ) {
 
+    if ( x == undefined )      { x = 0; }
+    if ( y == undefined )      { y = 0; }
+    if ( width == undefined )  { width = img.width; }
+    if ( height == undefined ) { height = img.height; }
+    
+    
     let data = new Object();
     //img.setAttribute( 'crossOrigin', 'anonymous' );
     let canvas = document.createElement( "canvas" );
@@ -8,7 +14,7 @@ function getImgDataArray( img ) {
     canvas.height = img.height;
     let ctx = canvas.getContext( "2d" );
     ctx.drawImage(img, 0, 0);
-    data = ctx.getImageData( 0, 0, img.width, img.height );
+    data = ctx.getImageData( x, y, width, height );
 
     canvas.parentNode.removeChild( canvas );
     
