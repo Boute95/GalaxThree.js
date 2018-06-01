@@ -12,8 +12,19 @@ function StarGenerator( galaxy, imgStarMap, starTexture, nbOfStars ) {
     this.galaxy = galaxy;
 
     this.imgMap = imgStarMap;
+
+    this.imgStarData = getImgDataArray( imgStarMap );
+
+    this.nbOfStarsForAWhitePixel = getNbOfStarsWhitePixel( this.imgStarData, nbOfStars );
+
+    this.pixelSizeInWorldCoord = galaxy.radiusInKm * 2 / imgStarMap.width;
+
+    this.chunkWidthInPixel = imgStarMap.width / this.galaxy.matrixChunks.length;
     
-    this.imgMatrix = createImgMatrix( imgMap );
+    this.maxStarForAChunk = getMaxStarChunk( this.imgStarData, nbOfStars,
+					     this.galaxy.matrixChunks.length );
+
+    this.imgMatrix = createImgMatrix( this );
     
     this.starTexture = starTexture;
 
@@ -37,14 +48,6 @@ function StarGenerator( galaxy, imgStarMap, starTexture, nbOfStars ) {
 	}
     }
 
-    this.nbOfStarsForAWhitePixel = getNbOfStarsWhitePixel( this.imgStarData, nbOfStars );
-
-    this.pixelSizeInWorldCoord = galaxy.radiusInKm * 2 / imgStarMap.width;
-
-    this.nbPixelForAChunkWidth = imgStarMap.width / this.galaxy.matrixChunks.length;
-		  
-    this.maxStarForAChunk = getMaxStarChunk( this.imgStarData, nbOfStars,
-					     this.galaxy.matrixChunks.length );
 
     
 
@@ -115,55 +118,47 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 //////////////////////////////////////////////////////////////////////
 StarGenerator.prototype.generateChunk = function( categoryIndex, matrixX, matrixY ) {
 
+    // 2211ms without matrix
+    
     let arng = new alea( matrixX + matrixY * this.galaxy.matrixChunks.length );
     let category = this.galaxy.arrayStarCategories[ categoryIndex ];
     let imgPos = matrixToImgPos( { x: matrixX, y: matrixY },
 				 this.galaxy.matrixChunks.length, this.imgMap.width );
-    let imgData = getImgDataArray( this.imgMap, imgPos.x, imgPos.y,
-				   this.nbPixelForAChunkWidth, this.nbPixelForAChunkWidth );
     let theCategory = this.galaxy.arrayStarCategories[ categoryIndex ];
 
 
-    // For each pixel of the chunk.
-    for ( let i = 0 ; i < imgData.data.length ; i += 4 ) {
+    for ( let y = imgPos.y ; y < imgPos.y + this.chunkWidthInPixel ; ++y ) {
 
-	let nbOfStarsForThisPixel =
-	    this.nbOfStarsForAWhitePixel * ( imgData.data[i] / 255.0 );
-	let pixelX = imgPos.x + ( i / 4 ) % this.nbPixelForAChunkWidth;
-	let pixelY = imgPos.y + Math.floor( ( i / 4 ) / this.nbPixelForAChunkWidth );
-	let worldXMin = pixelX * this.pixelSizeInWorldCoord - this.pixelSizeInWorldCoord / 2
-	    - this.galaxy.radiusInKm;
-	let worldXMax = pixelX * this.pixelSizeInWorldCoord + this.pixelSizeInWorldCoord / 2
-	    - this.galaxy.radiusInKm;
-	let worldZMin = pixelY * this.pixelSizeInWorldCoord - this.pixelSizeInWorldCoord / 2
-	    - this.galaxy.radiusInKm;
-	let worldZMax = pixelY * this.pixelSizeInWorldCoord + this.pixelSizeInWorldCoord / 2
-	    - this.galaxy.radiusInKm;
-	let height = this.galaxy.heightInKm + imgData.data[i + 1] / 255.0
-	    * ( this.galaxy.maxHeightInKm - this.galaxy.heightInKm );
+	for ( let x = imgPos.x ; x < imgPos.x + this.chunkWidthInPixel ; ++x ) {
 
-	for ( let starNb = 0 ; starNb < nbOfStarsForThisPixel ; ++starNb ) {
-	    
-	    let a = arng();    //< Determines which star category to select
+	    let pixel = this.imgMatrix[y][x];
 
-	    if ( a < theCategory.proba ) {
-
-		let starVertex = new THREE.Vector3();
-		starVertex.x = arng.double() * ( worldXMax - worldXMin ) + worldXMin;
-		starVertex.z = arng.double() * ( worldZMax - worldZMin ) + worldZMin
-		starVertex.y = randomGauss( 0, height / 3 );
-
-		let whichSpectralType = Math.floor(
-		    arng() * category.spectralTypes.length );
-		this.arrayGeometriesStar[categoryIndex][whichSpectralType].vertices.push(
-		    starVertex );
-		this.galaxy.starCount += 1;
+	    for ( let i = 0 ; i < pixel.nbOfStars ; ++i ) {
 		
+		let a = arng();    //< Determines which star category to select
+		
+		if ( a < theCategory.proba ) {
+		    
+		    let starVertex = new THREE.Vector3();
+		    
+		    starVertex.x = arng.double() * ( pixel.worldXMax - pixel.worldXMin ) +
+			pixel.worldXMin;
+		    starVertex.z = arng.double() * ( pixel.worldZMax - pixel.worldZMin ) +
+			pixel.worldZMin;
+		    starVertex.y = randomGauss( 0, pixel.height / 3 );
+
+		    let whichSpectralType = Math.floor( arng() * category.spectralTypes.length );
+		    this.arrayGeometriesStar[categoryIndex][whichSpectralType].vertices.push(
+			starVertex );
+		    this.galaxy.starCount += 1;
+		
+		}
+
 	    }
 		
-	} // end for each star of this pixel.
+	} 
 	
-    } // end for each pixel of the chunk.
+    }
     
 	
 } // end method
@@ -262,14 +257,44 @@ function matrixToImgPos( matrixPos, matrixSize, imgWidth ) {
 
 
 
-function createImgMatrix( img ) {
+function createImgMatrix( starGenerator ) {
 
-    let imgData = getImgDataArray( img );
+    let imgData = starGenerator.imgStarData;
     
-    let matrix = new Array();
-    for ( let i = 0 ; i < img.width ; ++i ) {
+    let matrix = [];
+    for ( let i = 0 ; i < starGenerator.imgMap.width ; ++i ) {
+	
+	matrix.push( new Array() );
+	
+	for( let j = 0 ; j < starGenerator.imgMap.height ; ++j ) {
+	    
+	    matrix[i].push( {} );
+
+	    let indexData = ( j + i * starGenerator.imgMap.width ) * 4;
+
+	    matrix[i][j].nbOfStars =
+		starGenerator.nbOfStarsForAWhitePixel * ( imgData.data[indexData] / 255.0 );
+	    
+	    matrix[i][j].worldXMin = j * starGenerator.pixelSizeInWorldCoord -
+		starGenerator.pixelSizeInWorldCoord / 2	- starGenerator.galaxy.radiusInKm;
+	    
+	    matrix[i][j].worldXMax = j * starGenerator.pixelSizeInWorldCoord +
+		starGenerator.pixelSizeInWorldCoord / 2	- starGenerator.galaxy.radiusInKm;
+	    
+	    matrix[i][j].worldZMin = j * starGenerator.pixelSizeInWorldCoord -
+		starGenerator.pixelSizeInWorldCoord / 2	- starGenerator.galaxy.radiusInKm;
+	    
+	    matrix[i][j].worldZMax = j * starGenerator.pixelSizeInWorldCoord +
+		starGenerator.pixelSizeInWorldCoord / 2	- starGenerator.galaxy.radiusInKm;
+	    
+	    matrix[i][j].height = starGenerator.galaxy.heightInKm + imgData.data[indexData + 1]
+		/ 255.0	* ( starGenerator.galaxy.maxHeightInKm - starGenerator.galaxy.heightInKm );
+
+	}
 	
     }
+
+    return matrix;
 
 }
 
