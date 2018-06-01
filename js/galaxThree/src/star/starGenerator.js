@@ -2,7 +2,7 @@ import { ly } from '../consts.js';
 import { createMaterials } from './material.js';
 import { setProbaPerChunk } from './chunk.js';
 import { writeConsole, getImgDataArray } from '../utils.js';
-import { randomUniformSeeded, randomGaussSeeded } from '../proba.js';
+import { randomUniform, randomGauss } from '../proba.js';
 
 
 //////////////////////////////////////////////////////////////////////
@@ -115,8 +115,8 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 //////////////////////////////////////////////////////////////////////
 StarGenerator.prototype.generateChunk = function( categoryIndex, matrixX, matrixY ) {
 
-    
-    let seed = matrixX + matrixY * this.galaxy.matrixChunks.length;
+    let arng = new alea( matrixX + matrixY * this.galaxy.matrixChunks.length );
+    //Math.seedrandom( matrixX + matrixY * this.galaxy.matrixChunks.length );
     let category = this.galaxy.arrayStarCategories[ categoryIndex ];
     let imgPos = matrixToImgPos( { x: matrixX, y: matrixY },
 				 this.galaxy.matrixChunks.length, this.imgMap.width );
@@ -145,17 +145,17 @@ StarGenerator.prototype.generateChunk = function( categoryIndex, matrixX, matrix
 
 	for ( let starNb = 0 ; starNb < nbOfStarsForThisPixel ; ++starNb ) {
 	    
-	    let a = randomUniformSeeded( seed++, 0, 1 );    //< Determines which star category to select
+	    let a = arng();    //< Determines which star category to select
 
 	    if ( a < theCategory.proba ) {
 
 		let starVertex = new THREE.Vector3();
-		starVertex.x = randomUniformSeeded( ++seed, worldXMin, worldXMax );
-		starVertex.z = randomUniformSeeded( ++seed, worldZMin, worldZMax );
-		starVertex.y = randomGaussSeeded( ++seed, 0, height / 3 );
+		starVertex.x = arng.double() * ( worldXMax - worldXMin ) + worldXMin;
+		starVertex.z = arng.double() * ( worldZMax - worldZMin ) + worldZMin
+		starVertex.y = randomGauss( 0, height / 3 );
 
 		let whichSpectralType = Math.floor(
-		    randomUniformSeeded( seed, 0, category.spectralTypes.length ) );
+		    arng() * category.spectralTypes.length );
 		this.arrayGeometriesStar[categoryIndex][whichSpectralType].vertices.push(
 		    starVertex );
 		this.galaxy.starCount += 1;
@@ -254,8 +254,8 @@ function matrixToImgPos( matrixPos, matrixSize, imgWidth ) {
     let coef = imgWidth / matrixSize;
     
     return {
-	x: matrixPos.x * coef,
-	y: matrixPos.y * coef,
+	x: Math.floor( matrixPos.x * coef ),
+	y: Math.floor( matrixPos.y * coef ),
     }
 
 }

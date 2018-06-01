@@ -38,8 +38,8 @@ function getMaterial( texture, luminosity, maxStarLuminosity, color ) {
     let pointShader = THREE.ShaderLib[ 'points' ];
     let basicShader = THREE.ShaderLib[ 'basic' ];
 
-    let maxOpacityDistance = 5e3 * Math.sqrt( luminosity ) *  ly;
-    let minOpacityDistance = 1e5 * Math.sqrt( luminosity ) * ly;
+    let maxOpacityDistance = 4e3 * Math.sqrt( luminosity ) *  ly;
+    let minOpacityDistance = 1e4 * Math.sqrt( luminosity ) * ly;
     let cstOpacityFunction = minOpacityDistance / ( minOpacityDistance - maxOpacityDistance );
     let factorOpacityFunction =  - cstOpacityFunction / minOpacityDistance;
 
