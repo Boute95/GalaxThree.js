@@ -13,7 +13,7 @@ function StarGenerator( galaxy, imgStarMap, starTexture, nbOfStars ) {
 
     this.imgMap = imgStarMap;
     
-    this.imgStarData = getImgDataArray( imgStarMap );
+    this.imgMatrix = createImgMatrix( imgMap );
     
     this.starTexture = starTexture;
 
@@ -47,7 +47,7 @@ function StarGenerator( galaxy, imgStarMap, starTexture, nbOfStars ) {
 					     this.galaxy.matrixChunks.length );
 
     
-    
+
     setProbaPerChunk( this.imgStarData, this.galaxy.matrixChunks );
 
     
@@ -116,7 +116,6 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 StarGenerator.prototype.generateChunk = function( categoryIndex, matrixX, matrixY ) {
 
     let arng = new alea( matrixX + matrixY * this.galaxy.matrixChunks.length );
-    //Math.seedrandom( matrixX + matrixY * this.galaxy.matrixChunks.length );
     let category = this.galaxy.arrayStarCategories[ categoryIndex ];
     let imgPos = matrixToImgPos( { x: matrixX, y: matrixY },
 				 this.galaxy.matrixChunks.length, this.imgMap.width );
@@ -260,6 +259,19 @@ function matrixToImgPos( matrixPos, matrixSize, imgWidth ) {
 
 }
 
+
+
+
+function createImgMatrix( img ) {
+
+    let imgData = getImgDataArray( img );
+    
+    let matrix = new Array();
+    for ( let i = 0 ; i < img.width ; ++i ) {
+	
+    }
+
+}
 
     
 
