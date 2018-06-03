@@ -106,6 +106,9 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
     }
 
 
+
+    //Remove previous stars.
+    this.galaxy.removeMeshes();
     
     // Adds stars to the scene.
     for ( let i = 0 ; i < this.arrayGeometriesStar.length ; ++i ) {
@@ -114,6 +117,7 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
     		let mesh = new THREE.Points( this.arrayGeometriesStar[i][j],
     					     this.arrayMaterialsStar[i][j] );
     		this.galaxy.scene.add( mesh );
+		this.galaxy.starMeshes.push( mesh );
     		this.galaxy.nbOfMesh += 1;
     	    }
     	}
@@ -133,6 +137,7 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 //////////////////////////////////////////////////////////////////////
 StarGenerator.prototype.generateChunk = function( categoryIndex, matrixX, matrixY ) {
 
+    
     let randomizator = new alea( matrixX + matrixY * this.galaxy.matrixChunks.length );
     let category = this.galaxy.arrayStarCategories[ categoryIndex ];
     let imgPos = matrixToImgPos( { x: matrixX, y: matrixY },
@@ -164,7 +169,6 @@ StarGenerator.prototype.generateChunk = function( categoryIndex, matrixX, matrix
 		    let whichSpectralType = Math.floor( randomizator() * category.spectralTypes.length );
 		    this.arrayGeometriesStar[categoryIndex][whichSpectralType].vertices.push(
 			starVertex );
-		    this.arrayGeometriesStar[categoryIndex][whichSpectralType].verticesNeedUpdate = true;
 		    this.galaxy.starCount += 1;
 		
 		}

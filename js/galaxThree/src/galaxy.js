@@ -126,6 +126,17 @@ function Galaxy( scene,
 
 	
     }; // end method
+
+
+
+
+    this.removeMeshes = function() {
+
+	for ( let mesh of this.starMeshes ) {
+	    this.scene.remove( mesh );
+	}
+	
+    }
     
 
     // end public methods
