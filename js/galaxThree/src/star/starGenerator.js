@@ -281,10 +281,10 @@ function createImgMatrix( starGenerator ) {
 	    matrix[i][j].worldXMax = j * starGenerator.pixelSizeInWorldCoord +
 		starGenerator.pixelSizeInWorldCoord / 2	- starGenerator.galaxy.radiusInKm;
 	    
-	    matrix[i][j].worldZMin = j * starGenerator.pixelSizeInWorldCoord -
+	    matrix[i][j].worldZMin = i * starGenerator.pixelSizeInWorldCoord -
 		starGenerator.pixelSizeInWorldCoord / 2	- starGenerator.galaxy.radiusInKm;
 	    
-	    matrix[i][j].worldZMax = j * starGenerator.pixelSizeInWorldCoord +
+	    matrix[i][j].worldZMax = i * starGenerator.pixelSizeInWorldCoord +
 		starGenerator.pixelSizeInWorldCoord / 2	- starGenerator.galaxy.radiusInKm;
 	    
 	    matrix[i][j].height = starGenerator.galaxy.heightInKm + imgData.data[indexData + 1]
