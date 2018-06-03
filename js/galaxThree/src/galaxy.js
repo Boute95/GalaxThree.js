@@ -39,6 +39,8 @@ function Galaxy( scene,
 
     this.maxHeightInKm = maxHeightInLy * ly;
 
+    this.starGenerator;
+
     this.starMeshes = [];
 
     this.matrixChunks;
@@ -91,8 +93,12 @@ function Galaxy( scene,
     
     this.update = function( camera )  {
 
-	// Update the cam position in the plane's uniform.
+
 	let camPos = camera.position.clone();
+	
+	self.starGenerator.generateStars( camPos );
+	
+	// Update the cam position in the plane's uniform.
 	self.galaxyPlane.worldToLocal( camPos );
 	self.galaxyPlane.material.uniforms[ 'myCamPosition' ].value = camPos.clone();
 
@@ -117,6 +123,7 @@ function Galaxy( scene,
 	    self.galaxyPlane.material.uniforms[ 'maxOpacity' ].value =
 		self.galaxyPlane.maxOpacity;
 	}
+
 	
     }; // end method
     
@@ -152,18 +159,18 @@ function Galaxy( scene,
 	let starTexture = new THREE.TextureLoader().load( self.dirPath +
 							  'resources/particle4.png' );
 
-	let starGenerator = new StarGenerator( self, imgStarMap, starTexture,
+	self.starGenerator = new StarGenerator( self, imgStarMap, starTexture,
 					       numberOfStars );
 
 	// Star generation
 	let start = performance.now();
-	starGenerator.generateStars( new THREE.Vector3( 0, 0, 0 ) );
+	self.starGenerator.generateStars( new THREE.Vector3( 0, 0, 0 ) );
 	let end = performance.now();
 	writeConsole( "Number of stars : " + self.starCount );
 	writeConsole( "Generation time : " + (end - start) + "ms" );
 
 	
-	//generateAbsorptionClouds( self, 5e3, imgCloudMap, scene );
+	generateAbsorptionClouds( self, 2e3, imgCloudMap, scene );
 	//generateEmissionClouds( self, 5e4, imgCloudMap, scene );
 	
 	
