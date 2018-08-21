@@ -31,8 +31,6 @@ function Galaxy( scene,
     
     this.starCount = 0;
 
-    this.nbOfMesh = 0;
-    
     this.radiusInKm = radiusInLy * ly;
     
     this.heightInKm = heightInLy * ly;
@@ -135,7 +133,8 @@ function Galaxy( scene,
 	for ( let mesh of this.starMeshes ) {
 	    this.scene.remove( mesh );
 	}
-	
+	this.starMeshes.length = 0;
+
     }
     
 
