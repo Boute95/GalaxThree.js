@@ -95,7 +95,7 @@ function Galaxy( scene,
 	let camPos = camera.position.clone();
 	
 	self.starGenerator.generateStars( camPos );
-	
+
 	// Update the cam position in the plane's uniform.
 	self.galaxyPlane.worldToLocal( camPos );
 	self.galaxyPlane.material.uniforms[ 'myCamPosition' ].value = camPos.clone();
@@ -176,7 +176,6 @@ function Galaxy( scene,
 	let start = performance.now();
 	self.starGenerator.generateStars( new THREE.Vector3( 0, 0, 0 ) );
 	let end = performance.now();
-	writeConsole( "Number of stars : " + self.starCount );
 	writeConsole( "Generation time : " + (end - start) + "ms" );
 
 	

@@ -83,7 +83,7 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 	  ++catIndex ) {
 	this.removeVertices( catIndex );
     }
-    this.starCount = 0;
+    this.galaxy.starCount = 0;
 
 
     // Generate vertices.
@@ -133,7 +133,7 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 
     
     writeConsole( "Number of mesh : " + this.galaxy.starMeshes.length );
-    writeConsole( 'Nb of vertices ' + this.arrayGeometriesStar[0][0].vertices.length );
+    writeConsole( 'Nb of stars ' + this.galaxy.starCount );
     
     
 } // end generateStars method

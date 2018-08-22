@@ -1,7 +1,8 @@
 import { ly } from './consts.js';
 
 
-function generateGalaxPlane( galaxy, scene ) {
+
+function generateGalaxPlane( galaxy ) {
 
     let geo = new THREE.PlaneBufferGeometry( galaxy.radiusInKm * 2, galaxy.radiusInKm * 2 );
     let tex = new THREE.TextureLoader().load( galaxy.dirPath + "resources/milkyway.png" );
@@ -72,7 +73,8 @@ function generateGalaxPlane( galaxy, scene ) {
     // Constructs the mesh.
     galaxy.galaxyPlane = new THREE.Mesh( geo, mat );
     galaxy.galaxyPlane.rotation.x = - Math.PI / 2;
-    scene.add( galaxy.galaxyPlane );
+    galaxy.galaxyPlane.renderOrder = 1;
+    galaxy.scene.add( galaxy.galaxyPlane );
 
     
     // Set some attributes to the galaxyPlane useful for hiding it according to the
