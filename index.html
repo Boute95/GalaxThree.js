@@ -26,8 +26,7 @@
 	<script src="/js/lib/dat.gui.min.js"></script>
 	<script src="/js/lib/alea.min.js"></script>
 	<script src="/js/lib/three.min.js"></script>
-	<script src="/js/lib/OrbitControls.js"></script>
-	<script src="/js/lib/wasd.js"></script>	
+	<script src="/js/lib/FirstPersonControls.js"></script>	
 	<script src="/js/lib/EffectComposer.js"></script>
 	<script src="/js/lib/CopyShader.js"></script> 
 	<script src="/js/lib/RenderPass.js"></script>
@@ -46,7 +45,7 @@
 	 const radiusGalaxyInLy = 1e5; //< In light years.
 	 const farViewInLy = 5e5;
 	 let statsFPS, gui, myCanvas, clock;
-	 let bloomPass, composer, renderer, camera, wasdControls, orbitControls, scene, galaxy;
+	 let bloomPass, composer, renderer, camera, fpControls, orbitControls, scene, galaxy;
 	 let params = {
 	     projection: 'normal',
 	     background: false,
@@ -79,18 +78,15 @@
 	     // Camera
 	     camera = new THREE.PerspectiveCamera(
 		 50, myCanvas.width / myCanvas.height, 1e3 * G3.ly, farViewInLy * G3.ly );
-	     camera.position.y = 0;
 	     camera.updateProjectionMatrix();
 
 	     // Clock
 	     clock = new THREE.Clock();
 
 	     // Controls
-	     wasdControls = new Wasd( camera );
-             wasdControls.movementSpeed = 100 * G3.ly;
-	     orbitControls = new THREE.OrbitControls( camera, myCanvas );
-	     orbitControls.minDistance = 1;
-	     orbitControls.maxDistance = 1;
+	     fpControls = new THREE.FirstPersonControls( camera );
+             fpControls.movementSpeed = 10000 * G3.ly;
+	     fpControls.lookSpeed = 0.08;
              
 	     // Scene
 	     scene = new THREE.Scene();
@@ -132,7 +128,7 @@
 	     statsFPS.begin();
 	     composer.render();
 	     galaxy.update( camera );
-	     wasdControls.update( delta );
+	     fpControls.update( delta );
 	     statsFPS.end();
 	     requestAnimationFrame( render );
 	 }
