@@ -84,9 +84,8 @@
 	     
 	     // Controls
 	     controls = new THREE.OrbitControls( camera, myCanvas );
-	     //controls.enableDamping = true;
-	     controls.minDistance = G3.ly;
-	     controls.maxDistance = farViewInLy * G3.ly;
+	     controls.minDistance = 1;
+	     controls.maxDistance = 1;
 	     
 	     // Scene
 	     scene = new THREE.Scene();
