@@ -10,112 +10,127 @@
 	<meta charset=utf-8>
 	<title>My first three.js app</title>
 	<style>
-	 body { margin: 0; overflow: hidden}
+	 body { margin: 0; overflow: hidden }
+	 img { display: none }
 	</style>
     </head>
 
     
-    <body>
+    <body id="body">
 	
 	<canvas id="myCanvas"></canvas>
+	<img id="shape" src="/js/galaxThree/resources/mw-star-map-RGB.png"/>
+	<img id="cloud" src="/js/galaxThree/resources/mw-cloud-map-RGB.png"/>
 
-	<script src="js/lib/stats.min.js"></script>
-	<script src="js/lib/dat.gui.min.js"></script>
-	<script src="js/lib/three.min.js"></script>
-	<script src="js/lib/OrbitControls.js"></script>	
-	<script src="js/lib/EffectComposer.js"></script>
-	<script src="js/lib/CopyShader.js"></script> 
-	<script src="js/lib/RenderPass.js"></script>
-	<script src="js/lib/ShaderPass.js"></script>
-	<script src="js/lib/LuminosityHighPassShader.js"></script>
-	<script src="js/lib/UnrealBloomPass.js"></script>
-	<script src="js/lib/GalaxThree.js"></script>
-	
-	<script>
+	<script src="/js/lib/stats.min.js"></script>
+	<script src="/js/lib/dat.gui.min.js"></script>
+	<script src="/js/lib/alea.min.js"></script>
+	<script src="/js/lib/three.min.js"></script>
+	<script src="/js/lib/FirstPersonControls.js"></script>	
+	<script src="/js/lib/EffectComposer.js"></script>
+	<script src="/js/lib/CopyShader.js"></script> 
+	<script src="/js/lib/RenderPass.js"></script>
+	<script src="/js/lib/ShaderPass.js"></script>
+	<script src="/js/lib/LuminosityHighPassShader.js"></script>
+	<script src="/js/lib/UnrealBloomPass.js"></script>
+	<script type="module">
 
+	 import { G3 } from '/js/galaxThree/src/galaxThree.js';
+	 
 	 //////////////////////////////////////////////////////////////////////
 	 // We suppose 1 unit = 1 km //
 	 //////////////////////////////
 
 	 // Variables
-	 const radiusGalaxyInLy = 400; //< In light years.
-	 const farViewInLy = 1000;
-	 var statsFPS, gui, myCanvas;
-	 var bloomPass, composer, renderer, camera, controls, scene, galaxy;
-	 var params = {
+	 const radiusGalaxyInLy = 1e5; //< In light years.
+	 const farViewInLy = 5e5;
+	 let statsFPS, gui, myCanvas, clock;
+	 let bloomPass, composer, renderer, camera, fpControls, orbitControls, scene, galaxy;
+	 let params = {
 	     projection: 'normal',
 	     background: false,
-	     bloomStrength: 2.0,
-	     bloomThreshold: 0.5,
+	     bloomStrength: 1.0,
+	     bloomThreshold: 0.85,
 	     bloomRadius: 0.4,
 	 };
-	 
+
 	 init();
 	 initPostProcess();
 	 render();
 
 
-	 
+
 	 //////////////////////////////////////////////////////////////////////
 	 function init() {
 	     
 	     // Canvas resize
-	     myCanvas = document.getElementById("myCanvas");
+	     myCanvas = document.getElementById( "myCanvas" );
 	     myCanvas.width = window.innerWidth;
 	     myCanvas.height = window.innerHeight;
 
 	     // Renderer
 	     renderer = new THREE.WebGLRenderer(
-		 {canvas : myCanvas, antialias: true, logarithmicDepthBuffer: false});
-	     renderer.setClearColor(0x030303);
-	     renderer.setPixelRatio(window.devicePixelRatio);
-	     renderer.setSize(myCanvas.width, myCanvas.height);
+		 { canvas : myCanvas, antialias: true, logarithmicDepthBuffer: false } );
+	     renderer.setClearColor( 0x030303 );
+	     renderer.setPixelRatio( window.devicePixelRatio );
+	     renderer.setSize( myCanvas.width, myCanvas.height );
 	     
 	     // Camera
 	     camera = new THREE.PerspectiveCamera(
-		 50, myCanvas.width / myCanvas.height, 10, farViewInLy * ly);
-	     
+		 50, myCanvas.width / myCanvas.height, 1e3 * G3.ly, farViewInLy * G3.ly );
+	     camera.updateProjectionMatrix();
+
+	     // Clock
+	     clock = new THREE.Clock();
+
 	     // Controls
-	     controls = new THREE.OrbitControls(camera, myCanvas);
-	     controls.enableDamping = true;
-	     controls.minDistance = 10;
-	     controls.maxDistance = 100;	 
-	     
+	     fpControls = new THREE.FirstPersonControls( camera );
+             fpControls.movementSpeed = 10000 * G3.ly;
+	     fpControls.lookSpeed = 0.08;
+             
 	     // Scene
 	     scene = new THREE.Scene();
 
 	     // Galaxy
-	     galaxy = new Galaxy(scene,
-				 "resources/particle1.png",
-				 radiusGalaxyInLy);
+	     let imgStarMap = document.getElementById( "shape" );
+	     let imgCloudMap = document.getElementById( "cloud" );
+	     galaxy = new G3.Galaxy( scene,
+				     '../js/galaxThree/',
+				     imgStarMap,
+				     imgCloudMap,
+				     1e9,
+				     radiusGalaxyInLy );
 
 	     // Monitoring
 	     statsFPS = new Stats();
 	     statsFPS.showPanel(0);
 	     document.body.appendChild(statsFPS.dom);
 
-	     // GUI
-	     /* gui = new dat.GUI();
-		gui.add( params, 'bloomThreshold', 0.0, 1.0 ).onChange( function ( value ) {
-		bloomPass.threshold = Number( value );
-		} );
-		gui.add( params, 'bloomStrength', 0.0, 10.0 ).onChange( function ( value ) {
-		bloomPass.strength = Number( value );
-		} );
-		gui.add( params, 'bloomRadius', 0.0, 2.0 ).onChange( function ( value ) {
-		bloomPass.radius = Number( value );
-		} );
-		gui.open(); */
+	     // // GUI
+	     gui = new dat.GUI();
+	     gui.add( params, 'bloomThreshold', 0.0, 1.0 ).onChange( function ( value ) {
+	      	 bloomPass.threshold = Number( value );
+	     } );
+	     gui.add( params, 'bloomStrength', 0.0, 10.0 ).onChange( function ( value ) {
+	      	 bloomPass.strength = Number( value );
+	     } );
+	     gui.add( params, 'bloomRadius', 0.0, 2.0 ).onChange( function ( value ) {
+		 bloomPass.radius = Number( value );
+	     } );
+	     gui.open();
 	     
 	 }
 
-	 
+
 	 //////////////////////////////////////////////////////////////////////
 	 function render() {
+	     let delta = clock.getDelta();
 	     statsFPS.begin();
 	     composer.render();
+	     galaxy.update( camera );
+	     fpControls.update( delta );
 	     statsFPS.end();
-	     requestAnimationFrame(render);
+	     requestAnimationFrame( render );
 	 }
 
 
@@ -138,7 +153,6 @@
 
 
 	 //////////////////////////////////////////////////////////////////////
-	 // Listener for window size change
 	 window.addEventListener("resize", onWindowResize);
 	 function onWindowResize() {
 	     myCanvas.width = window.innerWidth;
@@ -148,7 +162,8 @@
 	     renderer.setSize(myCanvas.width, myCanvas.height);
 	 }
 
-
+	 
 	</script>
+
     </body>
 </html>

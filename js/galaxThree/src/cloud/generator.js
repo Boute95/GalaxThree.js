@@ -52,7 +52,9 @@ function generateClouds( galaxy, materials, geometries, numberOfCloud,
     } // end for
 
     for( let i = 0 ; i < geometries.length ; ++i ) {
-	scene.add( new THREE.Points( geometries[i], materials[i] ) );
+	let mesh = new THREE.Points( geometries[i], materials[i] );
+	mesh.renderOrder = 1;
+	scene.add( mesh );
     }
     
     return cloudPlaced;
