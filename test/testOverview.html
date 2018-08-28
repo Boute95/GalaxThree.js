@@ -102,7 +102,7 @@
 				     '../js/galaxThree/',
 				     imgStarMap,
 				     imgCloudMap,
-				     1e10,
+				     1e9,
 				     radiusGalaxyInLy );
 
 	     // Monitoring
@@ -132,7 +132,6 @@
 	     composer.render();
 	     galaxy.update( cameraTest );
 	     moveCam.update();
-	     console.log( cameraTest.position.x / G3.ly );
 	     statsFPS.end();
 	     requestAnimationFrame( render );
 	 }

@@ -142,13 +142,6 @@ function Galaxy( scene,
     //////////////////////////////////////////////////////////////////////
 
 
-
-    
-    init();
-
-    
-
-    
     //////////////////////////////////////////////////////////////////////
     // Private methods
     
@@ -172,11 +165,7 @@ function Galaxy( scene,
 	self.starGenerator = new StarGenerator( self, imgStarMap, starTexture,
 					       numberOfStars );
 
-	// Star generation
-	let start = performance.now();
 	self.starGenerator.generateStars( new THREE.Vector3( 0, 0, 0 ) );
-	let end = performance.now();
-	writeConsole( "Generation time : " + (end - start) + "ms" );
 
 	
 	generateAbsorptionClouds( self, 2e3, imgCloudMap, scene );
@@ -184,12 +173,31 @@ function Galaxy( scene,
 	
 	
 	generateGalaxPlane( self, scene );
+
+	// Debug ...
+	window.addEventListener( 'keydown', function( event ) {
+	    if ( event.keyCode === 82 /*R*/ ) {
+		writeConsole( 'cette touche peut servir ...' );
+	    }
+	}, false );
+
 	
     } // end method
 
 
+    // end private methods
+    //////////////////////////////////////////////////////////////////////
+
+    
+
+    init();
+
+
     
 } // end constructor
+
+
+
 
 
 
