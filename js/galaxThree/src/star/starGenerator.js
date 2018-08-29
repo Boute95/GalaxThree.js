@@ -226,9 +226,11 @@ StarGenerator.prototype.generateVerticesChunk = function( categoryIndex, matrixX
 //////////////////////////////////////////////////////////////////////
 function generateGlobalStars( generator ) {
 
+    
     let arrayStarCategories = generator.galaxy.arrayStarCategories;
     let matrixSize = generator.galaxy.matrixChunks.length;
 
+    
     // Generate Vertices
     for ( let catIndex = 0 ; catIndex < arrayStarCategories.length ; ++catIndex ) {
 
@@ -248,7 +250,28 @@ function generateGlobalStars( generator ) {
 	
     }
 
-    // TODO : MESHES
+    
+    // Adds meshes to the scene.
+    for ( let catIndex = 0 ; catIndex < generator.arrayGeometriesStar.length ; ++catIndex ) {
+	
+	if ( generator.galaxy.arrayStarCategories[ catIndex ].nbOfChunks == 0 ) {
+	    
+    	    for ( let specType = 0 ; specType < generator.arrayGeometriesStar[ catIndex ].length ; ++specType ) {
+		
+    		if ( generator.arrayGeometriesStar[ catIndex ][ specType ].vertices.length > 0 ) {
+		    
+    		    let mesh = new THREE.Points( generator.arrayGeometriesStar[catIndex][specType],
+    						 generator.arrayMaterialsStar[catIndex][specType] );
+    		    generator.galaxy.scene.add( mesh );
+		    generator.galaxy.arrayStarCategories[ catIndex ].spectralTypes[ specType ].mesh = mesh;
+    		}
+		
+	    }
+	    
+    	}
+	
+    }
+    
     
 } // end method
 
