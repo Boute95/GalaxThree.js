@@ -3,7 +3,7 @@ import { ly } from '../consts.js';
 
 
 //////////////////////////////////////////////////////////////////////
-function createMaterials( arrayStarCategories, arraySpectralTypeToColor,
+function createMaterials( arrayStarCategories, arraySpectralCodeToColor,
 			  starTexture, maxStarLuminosity ) {
 
     let arrayMaterialsStar = new Array();
@@ -18,7 +18,7 @@ function createMaterials( arrayStarCategories, arraySpectralTypeToColor,
 	    arrayMaterialsStar[i].push(	getMaterial( starTexture,
 						     category.luminosity,
 						     maxStarLuminosity ,
-		    				     arraySpectralTypeToColor[spectralType]
+		    				     arraySpectralCodeToColor[spectralType.spectralCode]
 						   ) );
 	    
 	} // end for each spectral type of the category.

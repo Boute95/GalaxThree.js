@@ -49,8 +49,8 @@ function Galaxy( scene,
     this.galaxyPlane;
 
     this.arrayStarCategories = [
-	 new StarCategory("MS_M",["M"],
-	 		  0.3,     0.01,       0.8,     1),
+	new StarCategory("MS_M",["M"],
+	 		 0.3,     0.01,       0.8,     1),
 	new StarCategory("MS_K",["K"],
 			 0.8,     0.2,        0.08,     1),
 	new StarCategory("MS_G",["G"],
@@ -60,18 +60,18 @@ function Galaxy( scene,
 	new StarCategory("MS_A",["A"],
 			 1.7,     20.0,       0.007,    4),
 	new StarCategory("MS_B",["B"],
-			 5.0,     1000,       0.001,    12),
+			 5.0,     1000,       0.001,    0),
 	new StarCategory("MS_O",["O"],
-			 10.0,    100000.0,   0.0000001,12),
+			 10.0,    100000.0,   0.0000001,0),
 	new StarCategory("G",   ["G","K","M"],
-			 30.0,    600.0,      0.004,    12),
+			 30.0,    600.0,      0.004,    0),
 	new StarCategory("WD",  ["D"],
 			 0.01,    0.01,       0.05,     1),
 	new StarCategory("SG",  ["O","B","A","F","G","K","M"],
-			 300.0,   600000.0,   0.000001, 12),
+			 300.0,   600000.0,   0.000001, 0),
     ];
 
-    this.arraySpectralTypeToColor = {
+    this.arraySpectralCodeToColor = {
 	M : 0xFFCC6F,
 	K : 0xFFD2A1,
 	G : 0xFFF4EA,
@@ -130,8 +130,12 @@ function Galaxy( scene,
 
     this.removeMeshes = function() {
 
-	for ( let mesh of this.starMeshes ) {
-	    this.scene.remove( mesh );
+	for ( let cat of this.arrayStarCategories ) {
+	    if ( cat.nbOfChunks > 0 ) {
+		for ( let specType of cat.spectralTypes ) {
+		    this.scene.remove( specType.mesh );
+		}
+	    }
 	}
 	this.starMeshes.length = 0;
 
@@ -177,6 +181,7 @@ function Galaxy( scene,
 	// Debug ...
 	window.addEventListener( 'keydown', function( event ) {
 	    if ( event.keyCode === 82 /*R*/ ) {
+		self.removeMeshes();
 		writeConsole( 'cette touche peut servir ...' );
 	    }
 	}, false );

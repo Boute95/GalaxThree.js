@@ -36,7 +36,7 @@ function StarGenerator( galaxy, imgStarMap, starTexture, nbOfStars ) {
 
     // Material for each spectral type of each star category.
     this.arrayMaterialsStar = createMaterials( galaxy.arrayStarCategories,
-					       galaxy.arraySpectralTypeToColor,
+					       galaxy.arraySpectralCodeToColor,
 					       starTexture,
 					       this.maxStarLuminosity );
 
@@ -51,8 +51,10 @@ function StarGenerator( galaxy, imgStarMap, starTexture, nbOfStars ) {
     this.camPositionMatrix = { x: 0, y: 0 };
 
 
-    
 
+    
+    generateGlobalStars( this );
+    
     setProbaPerChunk( this.imgStarData, this.galaxy.matrixChunks );
 
     
@@ -85,9 +87,13 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 	  ++catIndex ) {  
 	
 	let theCategory = this.galaxy.arrayStarCategories[ catIndex ];
+
+	if ( this.galaxy.arrayStarCategories[ catIndex ].nbOfChunks > 0 ) {
 	
-	for ( let specType = 0 ; specType <  theCategory.spectralTypes.length ; ++specType ) {
-	    this.arrayGeometriesStar[catIndex][specType] = new THREE.Geometry();
+	    for ( let specType = 0 ; specType <  theCategory.spectralTypes.length ; ++specType ) {
+		this.arrayGeometriesStar[catIndex][specType] = new THREE.Geometry();
+	    }
+
 	}
 
     }
@@ -105,14 +111,18 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
     for ( let catIndex = 0 ; catIndex < this.galaxy.arrayStarCategories.length ; ++catIndex ) {
 
 	let nbOfChunks = this.galaxy.arrayStarCategories[ catIndex ].nbOfChunks;
-	
-	for ( let x = Math.max( 0, this.camPositionMatrix.x - nbOfChunks ) ;
-	      x <= Math.min( matrixSize-1, this.camPositionMatrix.x + nbOfChunks ) ; ++x ) {
-	    
-    	    for ( let y = Math.max( 0, this.camPositionMatrix.y - nbOfChunks ) ;
-    		  y <= Math.min( matrixSize-1, this.camPositionMatrix.y + nbOfChunks ) ; ++y ) {
 
-		this.generateChunk( catIndex, x, y );
+	if ( nbOfChunks > 0 ) {
+	    
+	    for ( let x = Math.max( 0, this.camPositionMatrix.x - nbOfChunks ) ;
+		  x <= Math.min( matrixSize-1, this.camPositionMatrix.x + nbOfChunks ) ; ++x ) {
+		
+    		for ( let y = Math.max( 0, this.camPositionMatrix.y - nbOfChunks ) ;
+    		      y <= Math.min( matrixSize-1, this.camPositionMatrix.y + nbOfChunks ) ; ++y ) {
+
+		    this.generateVerticesChunk( catIndex, x, y );
+		    
+		}
 		
 	    }
 	    
@@ -122,15 +132,24 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 
 
     // Adds meshes to the scene.
-    for ( let i = 0 ; i < this.arrayGeometriesStar.length ; ++i ) {
-    	for ( let j = 0 ; j < this.arrayGeometriesStar[i].length ; ++j ) {
-    	    if ( this.arrayGeometriesStar[i][j].vertices.length > 0 ) {
-    		let mesh = new THREE.Points( this.arrayGeometriesStar[i][j],
-    					     this.arrayMaterialsStar[i][j] );
-    		this.galaxy.scene.add( mesh );
-		this.galaxy.starMeshes.push( mesh );
-    	    }
+    for ( let catIndex = 0 ; catIndex < this.arrayGeometriesStar.length ; ++catIndex ) {
+	
+	if ( this.galaxy.arrayStarCategories[ catIndex ].nbOfChunks > 0 ) {
+	    
+    	    for ( let specType = 0 ; specType < this.arrayGeometriesStar[ catIndex ].length ; ++specType ) {
+		
+    		if ( this.arrayGeometriesStar[ catIndex ][ specType ].vertices.length > 0 ) {
+		    
+    		    let mesh = new THREE.Points( this.arrayGeometriesStar[catIndex][specType],
+    						 this.arrayMaterialsStar[catIndex][specType] );
+    		    this.galaxy.scene.add( mesh );
+		    this.galaxy.arrayStarCategories[ catIndex ].spectralTypes[ specType ].mesh = mesh;
+    		}
+		
+	    }
+	    
     	}
+	
     }
 
     
@@ -149,7 +168,7 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
 
 
 //////////////////////////////////////////////////////////////////////
-StarGenerator.prototype.generateChunk = function( categoryIndex, matrixX, matrixY ) {
+StarGenerator.prototype.generateVerticesChunk = function( categoryIndex, matrixX, matrixY ) {
 
 
     let randomizator = new alea( matrixX + matrixY * this.galaxy.matrixChunks.length );
@@ -205,12 +224,43 @@ StarGenerator.prototype.generateChunk = function( categoryIndex, matrixX, matrix
 
 
 //////////////////////////////////////////////////////////////////////
+function generateGlobalStars( generator ) {
+
+    let arrayStarCategories = generator.galaxy.arrayStarCategories;
+    let matrixSize = generator.galaxy.matrixChunks.length;
+
+    // Generate Vertices
+    for ( let catIndex = 0 ; catIndex < arrayStarCategories.length ; ++catIndex ) {
+
+	if ( arrayStarCategories[ catIndex ].nbOfChunks === 0 ) {
+
+	    for ( let x = 0 ; x <= matrixSize-1 ; ++x ) {
+		
+    		for ( let y = 0 ; y <= matrixSize-1 ; ++y ) {
+
+		    generator.generateVerticesChunk( catIndex, x, y );
+		    
+		}
+		
+	    }
+	    
+	}
+	
+    }
+
+    // TODO : MESHES
+    
+} // end method
+
+
+
+//////////////////////////////////////////////////////////////////////
 function getMaxStarChunk( imgData, nbOfStars, matrixSize ) {
 
     let nbPixelForAChunk = ( imgData.data.length / 4 ) / ( matrixSize * matrixSize );
     return getNbOfStarsWhitePixel( imgData, nbOfStars ) * nbPixelForAChunk;
     
-}
+} // end method
 
 
 
@@ -225,7 +275,7 @@ function getNbOfStarsWhitePixel( imgData, nbOfStars ) {
     }
     return ( nbOfStars / S );
     
-}
+} // end method
 
 
 
@@ -251,7 +301,7 @@ function worldPosToMatrixPos( camPosition, matrix, sizeGalaxyInKm ) {
 	y: yMatrix,
     }
 
-}
+} // end method
 
 
 
@@ -271,7 +321,7 @@ function matrixToWorldPos( matrixPos, matrixSize, chunkWorldSize ) {
 	y: yMatrixOriginAdjusted * chunkWorldSize,
     }
 
-}
+} // end method
 
 
 
@@ -290,7 +340,7 @@ function matrixToImgPos( matrixPos, matrixSize, imgWidth ) {
 	y: Math.floor( matrixPos.y * coef ),
     }
 
-}
+} // end method
 
 
 
@@ -334,7 +384,7 @@ function createImgMatrix( starGenerator ) {
 
     return matrix;
 
-}
+} // end method
 
     
 
