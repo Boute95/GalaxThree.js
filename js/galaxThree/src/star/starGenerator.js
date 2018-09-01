@@ -153,7 +153,6 @@ StarGenerator.prototype.generateStars = function( camPosition ) {
     }
 
     
-    writeConsole( "Number of mesh : " + this.galaxy.starMeshes.length );
     writeConsole( 'Nb of stars ' + this.galaxy.starCount );
     
     let end = performance.now();

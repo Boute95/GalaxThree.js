@@ -39,8 +39,6 @@ function Galaxy( scene,
 
     this.starGenerator;
 
-    this.starMeshes = [];
-
     this.matrixChunks;
 
     this.chunkWorldSize;
@@ -101,10 +99,14 @@ function Galaxy( scene,
 	self.galaxyPlane.material.uniforms[ 'myCamPosition' ].value = camPos.clone();
 
 	// Updates the cam position for each stars' materials
-	for ( let mesh of self.starMeshes ) {
-	    let camPos = camera.position.clone();
-	    mesh.worldToLocal( camPos );
-	    mesh.material.uniforms[ 'myCamPosition' ].value = camPos;
+	for ( let category of this.arrayStarCategories ) {
+	    for ( let spectralType of category.spectralTypes ) {
+		if ( spectralType.mesh !== undefined ) {
+		    let camPos = camera.position.clone();
+		    spectralType.mesh.worldToLocal( camPos );
+		    spectralType.mesh.material.uniforms[ 'myCamPosition' ].value = camPos;
+		}
+	    }
 	}
 
 	// Calculate the angle of the camera from the plane.
@@ -137,7 +139,6 @@ function Galaxy( scene,
 		}
 	    }
 	}
-	this.starMeshes.length = 0;
 
     }
     
