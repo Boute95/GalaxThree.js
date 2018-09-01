@@ -12,11 +12,11 @@ function generateEmissionClouds( galaxy, numberOfCloud, img, scene ) {
     let materials = [
 	new THREE.PointsMaterial( { color: 0xFFFFFF,
 	    			    map: textures[0],
-	    			    size: 8e3 * ly,
+	    			    size: 5e3 * ly,
 	    			    transparent: true,
 				    depthWrite: false,
 				    blending: THREE.AdditiveBlending,
-				    opacity: 0.06,
+				    opacity: 0.01,
 				  } ),
     ];
     

@@ -24,8 +24,10 @@
 
 	<script src="../js/lib/stats.min.js"></script>
 	<script src="../js/lib/dat.gui.min.js"></script>
+	<script src="../js/lib/alea.min.js"></script>
 	<script src="../js/lib/three.min.js"></script>
-	<script src="../js/lib/OrbitControls.js"></script>	
+	<script src="../js/lib/OrbitControls.js"></script>
+	<script src="/test/js/moveCamera.js"></script>	
 	<script src="../js/lib/EffectComposer.js"></script>
 	<script src="../js/lib/CopyShader.js"></script> 
 	<script src="../js/lib/RenderPass.js"></script>
@@ -44,7 +46,7 @@
 	 const radiusGalaxyInLy = 1e5; //< In light years.
 	 const farViewInLy = 5e5;
 	 var statsFPS, gui, myCanvas;
-	 var bloomPass, composer, renderer, camera, controls, scene, galaxy;
+	 var bloomPass, composer, renderer, camera, cameraTest, controls, moveCam, scene, galaxy;
 	 var params = {
 	     projection: 'normal',
 	     background: false,
@@ -80,12 +82,15 @@
 	     camera.position.y = radiusGalaxyInLy * G3.ly;
 	     camera.rotation.z = Math.PI;
 	     camera.updateProjectionMatrix();
+	     cameraTest = new THREE.Object3D();
 	     
 	     // Controls
 	     controls = new THREE.OrbitControls( camera, myCanvas );
-	     //controls.enableDamping = true;
-	     controls.minDistance = G3.ly;
-	     controls.maxDistance = farViewInLy * G3.ly;
+	     controls.minDistance = 1 * G3.ly;
+	     controls.maxDistance = 1e5 * G3.ly;
+	     controls.enableKeys = false;
+	     moveCam = new MoveCamera( cameraTest );
+	     moveCam.movementSpeed = 100 * G3.ly;
 	     
 	     // Scene
 	     scene = new THREE.Scene();
@@ -97,7 +102,7 @@
 				     '../js/galaxThree/',
 				     imgStarMap,
 				     imgCloudMap,
-				     1e7,
+				     5e9,
 				     radiusGalaxyInLy );
 
 	     // Monitoring
@@ -125,7 +130,8 @@
 	 function render() {
 	     statsFPS.begin();
 	     composer.render();
-	     galaxy.update( camera );
+	     galaxy.update( cameraTest );
+	     moveCam.update();
 	     statsFPS.end();
 	     requestAnimationFrame( render );
 	 }

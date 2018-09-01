@@ -1,26 +1,31 @@
 import { ly } from '../consts.js';
 
+
+
 //////////////////////////////////////////////////////////////////////
-function createStarGeoAndMaterials( galaxy ) {
+function createMaterials( arrayStarCategories, arraySpectralCodeToColor,
+			  starTexture, maxStarLuminosity ) {
 
-    for ( let i = 0 ; i < galaxy.arrayStarCategories.length ; ++i ) {
+    let arrayMaterialsStar = new Array();
+    
+    for ( let i = 0 ; i < arrayStarCategories.length ; ++i ) {
 
-	let category = galaxy.arrayStarCategories[i];
-	galaxy.arrayGeoAndMatStar.push( new Array() );
+	let category = arrayStarCategories[i];
+	arrayMaterialsStar.push( new Array() );
 
 	for ( let spectralType of category.spectralTypes ) {
 
-	    galaxy.arrayGeoAndMatStar[i].push( {
-		geometry: new THREE.Geometry(),
-		material: getStarMaterial( galaxy.starTexture,
-					   category.luminosity,
-					   galaxy.maxStarLuminosity ,
-		    			   galaxy.spectralTypeToColor[ spectralType ], )
-	    } );
+	    arrayMaterialsStar[i].push(	getMaterial( starTexture,
+						     category.luminosity,
+						     maxStarLuminosity ,
+		    				     arraySpectralCodeToColor[spectralType.spectralCode]
+						   ) );
 	    
 	} // end for each spectral type of the category.
 	
     } // end for each category.
+
+    return arrayMaterialsStar;
 
 } // end method
 
@@ -28,13 +33,13 @@ function createStarGeoAndMaterials( galaxy ) {
 
 
 //////////////////////////////////////////////////////////////////////
-function getStarMaterial( texture, luminosity, maxStarLuminosity, color ) {
+function getMaterial( texture, luminosity, maxStarLuminosity, color ) {
     
     let pointShader = THREE.ShaderLib[ 'points' ];
     let basicShader = THREE.ShaderLib[ 'basic' ];
 
-    let maxOpacityDistance = 5e3 * Math.sqrt( luminosity ) *  ly;
-    let minOpacityDistance = 1e5 * Math.sqrt( luminosity ) * ly;
+    let maxOpacityDistance = 4e3 * Math.sqrt( luminosity ) *  ly;
+    let minOpacityDistance = 1e4 * Math.sqrt( luminosity ) * ly;
     let cstOpacityFunction = minOpacityDistance / ( minOpacityDistance - maxOpacityDistance );
     let factorOpacityFunction =  - cstOpacityFunction / minOpacityDistance;
 
@@ -96,4 +101,4 @@ function getStarMaterial( texture, luminosity, maxStarLuminosity, color ) {
 } // end method
 
 
-export { createStarGeoAndMaterials };
+export { createMaterials };

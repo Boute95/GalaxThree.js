@@ -4,7 +4,8 @@ import { randomGauss } from '../proba.js';
 
 
 
-function generateClouds( galaxy, materials, geometries, numberOfCloud, img, RGBChannel, scene ) {
+function generateClouds( galaxy, materials, geometries, numberOfCloud,
+			 img, RGBChannel, scene ) {
 
     // Takes the data from the image.
     let imgData = getImgDataArray( img );
@@ -51,7 +52,9 @@ function generateClouds( galaxy, materials, geometries, numberOfCloud, img, RGBC
     } // end for
 
     for( let i = 0 ; i < geometries.length ; ++i ) {
-	scene.add( new THREE.Points( geometries[i], materials[i] ) );
+	let mesh = new THREE.Points( geometries[i], materials[i] );
+	mesh.renderOrder = 1;
+	scene.add( mesh );
     }
     
     return cloudPlaced;

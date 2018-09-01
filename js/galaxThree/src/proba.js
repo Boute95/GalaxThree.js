@@ -8,10 +8,13 @@ function randomUniform( min = 0, max = 1 ) {
 /**
  * Generate a random number with normal distribution N(mu, sigma) 
  */
-function randomGauss( mu = 0, sigma = 1 ) {
-    let u = Math.random();
-    let v = Math.random();
-    let Z = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2 * Math.PI * v );
+function randomGauss( mu, sigma, p1, p2 ) {
+    if ( mu === undefined )      mu = 0;
+    if ( sigma === undefined )   sigma = 1;
+    if ( p1 === undefined )      p1 = Math.random();
+    if ( p2 === undefined )      p2 = Math.random();
+    
+    let Z = Math.sqrt( -2.0 * Math.log( p1 ) ) * Math.cos( 2 * Math.PI * p2 );
     return Z * sigma + mu;
 }
 
