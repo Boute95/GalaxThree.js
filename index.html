@@ -50,7 +50,7 @@
 	     projection: 'normal',
 	     background: false,
 	     bloomStrength: 1.0,
-	     bloomThreshold: 0.85,
+	     bloomThreshold: 0.4,
 	     bloomRadius: 0.4,
 	 };
 
@@ -85,7 +85,7 @@
 
 	     // Controls
 	     fpControls = new THREE.FirstPersonControls( camera );
-             fpControls.movementSpeed = 10000 * G3.ly;
+             fpControls.movementSpeed = 1000 * G3.ly;
 	     fpControls.lookSpeed = 0.08;
              
 	     // Scene
@@ -98,7 +98,7 @@
 				     '../js/galaxThree/',
 				     imgStarMap,
 				     imgCloudMap,
-				     1e9,
+				     5e9,
 				     radiusGalaxyInLy );
 
 	     // Monitoring

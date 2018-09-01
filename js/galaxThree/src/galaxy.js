@@ -56,7 +56,7 @@ function Galaxy( scene,
 	new StarCategory("MS_F",["F"],
 			 1.3,     4.0,        0.02,     2),
 	new StarCategory("MS_A",["A"],
-			 1.7,     20.0,       0.007,    4),
+			 1.7,     20.0,       0.007,    0),
 	new StarCategory("MS_B",["B"],
 			 5.0,     1000,       0.001,    0),
 	new StarCategory("MS_O",["O"],
@@ -139,9 +139,26 @@ function Galaxy( scene,
 		}
 	    }
 	}
+	
+    }; // end method
 
-    }
-    
+
+
+    this.numberOfStars = function() {
+
+	let S = 0 ;
+
+	for ( let category of this.arrayStarCategories ) {
+	    for ( let spectralType of category.spectralTypes ) {
+		if ( spectralType.mesh !== undefined ) {
+		    S += spectralType.mesh.geometry.vertices.length;
+		}
+	    }
+	}
+
+	return S;
+	
+    }; // end method
 
     // end public methods
     //////////////////////////////////////////////////////////////////////
@@ -182,8 +199,10 @@ function Galaxy( scene,
 	// Debug ...
 	window.addEventListener( 'keydown', function( event ) {
 	    if ( event.keyCode === 82 /*R*/ ) {
-		self.removeMeshes();
 		writeConsole( 'cette touche peut servir ...' );
+	    }
+	    if ( event.keyCode === 67 /*C*/ ) {
+		writeConsole( 'Number of stars : ' + self.numberOfStars() );
 	    }
 	}, false );
 
