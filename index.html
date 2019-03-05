@@ -28,21 +28,21 @@
     <body id="body">
 	
 	<canvas id="myCanvas"></canvas>
-	<img id="shape" src="/js/galaxThree/resources/mw-star-map-RGB.png"/>
-	<img id="cloud" src="/js/galaxThree/resources/mw-cloud-map-RGB.png"/>
+	<img id="shape" src="./js/galaxThree/resources/mw-star-map-RGB.png"/>
+	<img id="cloud" src="./js/galaxThree/resources/mw-cloud-map-RGB.png"/>
 	<div id="help">Use the mouse to look around, W, A, S and D to navigate, R and F to go up and down</div>
 
-	<script src="/js/lib/stats.min.js"></script>
-	<script src="/js/lib/dat.gui.min.js"></script>
-	<script src="/js/lib/alea.min.js"></script>
-	<script src="/js/lib/three.min.js"></script>
-	<script src="/js/lib/FirstPersonControls.js"></script>	
-	<script src="/js/lib/EffectComposer.js"></script>
-	<script src="/js/lib/CopyShader.js"></script> 
-	<script src="/js/lib/RenderPass.js"></script>
-	<script src="/js/lib/ShaderPass.js"></script>
-	<script src="/js/lib/LuminosityHighPassShader.js"></script>
-	<script src="/js/lib/UnrealBloomPass.js"></script>
+	<script src="./js/lib/stats.min.js"></script>
+	<script src="./js/lib/dat.gui.min.js"></script>
+	<script src="./js/lib/alea.min.js"></script>
+	<script src="./js/lib/three.min.js"></script>
+	<script src="./js/lib/FirstPersonControls.js"></script>	
+	<script src="./js/lib/EffectComposer.js"></script>
+	<script src="./js/lib/CopyShader.js"></script> 
+	<script src="./js/lib/RenderPass.js"></script>
+	<script src="./js/lib/ShaderPass.js"></script>
+	<script src="./js/lib/LuminosityHighPassShader.js"></script>
+	<script src="./js/lib/UnrealBloomPass.js"></script>
 	<script type="module">
 
 	 import { G3 } from '/js/galaxThree/src/galaxThree.js';
@@ -106,7 +106,7 @@
 	     let imgStarMap = document.getElementById( "shape" );
 	     let imgCloudMap = document.getElementById( "cloud" );
 	     galaxy = new G3.Galaxy( scene,
-				     '../js/galaxThree/',
+				     './js/galaxThree/',
 				     imgStarMap,
 				     imgCloudMap,
 				     numberOfStars,
