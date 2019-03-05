@@ -8,10 +8,19 @@
     
     <head>
 	<meta charset=utf-8>
-	<title>My first three.js app</title>
+	<title>GalaxThree.js</title>
 	<style>
 	 body { margin: 0; overflow: hidden }
 	 img { display: none }
+	 #help{
+	     position: fixed;
+	     background-color: rgba(40, 40, 40, 0.5);
+	     color: white;
+	     font-size: 12px;
+	     bottom: 0;
+	     right: 0;
+	     margin: 0 auto;
+	 }
 	</style>
     </head>
 
@@ -21,6 +30,7 @@
 	<canvas id="myCanvas"></canvas>
 	<img id="shape" src="/js/galaxThree/resources/mw-star-map-RGB.png"/>
 	<img id="cloud" src="/js/galaxThree/resources/mw-cloud-map-RGB.png"/>
+	<div id="help">Use the mouse to look around, W, A, S and D to navigate, R and F to go up and down</div>
 
 	<script src="/js/lib/stats.min.js"></script>
 	<script src="/js/lib/dat.gui.min.js"></script>
@@ -42,6 +52,7 @@
 	 //////////////////////////////
 
 	 // Variables
+	 const numberOfStars = 5e9;
 	 const radiusGalaxyInLy = 1e5; //< In light years.
 	 const farViewInLy = 5e5;
 	 let statsFPS, gui, myCanvas, clock;
@@ -98,7 +109,7 @@
 				     '../js/galaxThree/',
 				     imgStarMap,
 				     imgCloudMap,
-				     5e9,
+				     numberOfStars,
 				     radiusGalaxyInLy );
 
 	     // Monitoring

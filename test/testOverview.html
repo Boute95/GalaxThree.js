@@ -12,6 +12,14 @@
 	<style>
 	 body { margin: 0; overflow: hidden }
 	 img { display: none }
+	 #help{
+	     position: fixed;
+	     background-color: rgba(40, 40, 40, 0.5);
+	     color: white;
+	     font-size: 12px;
+	     bottom: 0;
+	     margin: 0 auto;
+	 }
 	</style>
     </head>
 
@@ -21,6 +29,7 @@
 	<canvas id="myCanvas"></canvas>
 	<img id="shape" src="../js/galaxThree/resources/mw-star-map-RGB.png"/>
 	<img id="cloud" src="../js/galaxThree/resources/mw-cloud-map-RGB.png"/>
+	<div id="help">Use the mouse to look around, W, A, S and D to navigate, R and F to go up and down</div>
 
 	<script src="../js/lib/stats.min.js"></script>
 	<script src="../js/lib/dat.gui.min.js"></script>
