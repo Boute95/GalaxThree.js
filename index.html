@@ -1,0 +1,180 @@
+<!-- This file is part of GalaxThree.js which is released under GPL v3. -->
+
+
+
+<!DOCTYPE html>
+<html>
+
+    
+    <head>
+	<meta charset=utf-8>
+	<title>GalaxThree.js</title>
+	<style>
+	 body { margin: 0; overflow: hidden }
+	 img { display: none }
+	 #help{
+	     position: fixed;
+	     background-color: rgba(40, 40, 40, 0.5);
+	     color: white;
+	     font-size: 12px;
+	     bottom: 0;
+	     right: 0;
+	     margin: 0 auto;
+	 }
+	</style>
+    </head>
+
+    
+    <body id="body">
+	
+	<canvas id="myCanvas"></canvas>
+	<img id="shape" src="./js/galaxThree/resources/mw-star-map-RGB.png"/>
+	<img id="cloud" src="./js/galaxThree/resources/mw-cloud-map-RGB.png"/>
+	<div id="help">Use the mouse to look around, W, A, S and D to navigate, R and F to go up and down</div>
+
+	<script src="./js/lib/stats.min.js"></script>
+	<script src="./js/lib/dat.gui.min.js"></script>
+	<script src="./js/lib/alea.min.js"></script>
+	<script src="./js/lib/three.min.js"></script>
+	<script src="./js/lib/FirstPersonControls.js"></script>	
+	<script src="./js/lib/EffectComposer.js"></script>
+	<script src="./js/lib/CopyShader.js"></script> 
+	<script src="./js/lib/RenderPass.js"></script>
+	<script src="./js/lib/ShaderPass.js"></script>
+	<script src="./js/lib/LuminosityHighPassShader.js"></script>
+	<script src="./js/lib/UnrealBloomPass.js"></script>
+	<script type="module">
+
+	 import { G3 } from '/js/galaxThree/src/galaxThree.js';
+	 
+	 //////////////////////////////////////////////////////////////////////
+	 // We suppose 1 unit = 1 km //
+	 //////////////////////////////
+
+	 // Variables
+	 const numberOfStars = 5e9;
+	 const radiusGalaxyInLy = 1e5; //< In light years.
+	 const farViewInLy = 5e5;
+	 let statsFPS, gui, myCanvas, clock;
+	 let bloomPass, composer, renderer, camera, fpControls, orbitControls, scene, galaxy;
+	 let params = {
+	     projection: 'normal',
+	     background: false,
+	     bloomStrength: 1.0,
+	     bloomThreshold: 0.4,
+	     bloomRadius: 0.4,
+	 };
+
+	 init();
+	 initPostProcess();
+	 render();
+
+
+
+	 //////////////////////////////////////////////////////////////////////
+	 function init() {
+	     
+	     // Canvas resize
+	     myCanvas = document.getElementById( "myCanvas" );
+	     myCanvas.width = window.innerWidth;
+	     myCanvas.height = window.innerHeight;
+
+	     // Renderer
+	     renderer = new THREE.WebGLRenderer(
+		 { canvas : myCanvas, antialias: true, logarithmicDepthBuffer: false } );
+	     renderer.setClearColor( 0x030303 );
+	     renderer.setPixelRatio( window.devicePixelRatio );
+	     renderer.setSize( myCanvas.width, myCanvas.height );
+	     
+	     // Camera
+	     camera = new THREE.PerspectiveCamera(
+		 50, myCanvas.width / myCanvas.height, 1e3 * G3.ly, farViewInLy * G3.ly );
+	     camera.updateProjectionMatrix();
+
+	     // Clock
+	     clock = new THREE.Clock();
+
+	     // Controls
+	     fpControls = new THREE.FirstPersonControls( camera );
+             fpControls.movementSpeed = 1000 * G3.ly;
+	     fpControls.lookSpeed = 0.08;
+             
+	     // Scene
+	     scene = new THREE.Scene();
+
+	     // Galaxy
+	     let imgStarMap = document.getElementById( "shape" );
+	     let imgCloudMap = document.getElementById( "cloud" );
+	     galaxy = new G3.Galaxy( scene,
+				     './js/galaxThree/',
+				     imgStarMap,
+				     imgCloudMap,
+				     numberOfStars,
+				     radiusGalaxyInLy );
+
+	     // Monitoring
+	     statsFPS = new Stats();
+	     statsFPS.showPanel(0);
+	     document.body.appendChild(statsFPS.dom);
+
+	     // // GUI
+	     gui = new dat.GUI();
+	     gui.add( params, 'bloomThreshold', 0.0, 1.0 ).onChange( function ( value ) {
+	      	 bloomPass.threshold = Number( value );
+	     } );
+	     gui.add( params, 'bloomStrength', 0.0, 10.0 ).onChange( function ( value ) {
+	      	 bloomPass.strength = Number( value );
+	     } );
+	     gui.add( params, 'bloomRadius', 0.0, 2.0 ).onChange( function ( value ) {
+		 bloomPass.radius = Number( value );
+	     } );
+	     gui.open();
+	     
+	 }
+
+
+	 //////////////////////////////////////////////////////////////////////
+	 function render() {
+	     let delta = clock.getDelta();
+	     statsFPS.begin();
+	     composer.render();
+	     galaxy.update( camera );
+	     fpControls.update( delta );
+	     statsFPS.end();
+	     requestAnimationFrame( render );
+	 }
+
+
+
+	 //////////////////////////////////////////////////////////////////////
+	 function initPostProcess() {
+	     
+	     // Composer
+	     composer = new THREE.EffectComposer(renderer);
+
+	     // Passes post-processing
+	     var renderPass = new THREE.RenderPass(scene, camera);
+	     bloomPass = new THREE.UnrealBloomPass(
+		 new THREE.Vector2(myCanvas.width, myCanvas.height), 1.5, 0.85, 0.4);
+	     composer.addPass(renderPass);
+	     composer.addPass(bloomPass);
+	     bloomPass.renderToScreen = true;
+	     
+	 }
+
+
+	 //////////////////////////////////////////////////////////////////////
+	 window.addEventListener("resize", onWindowResize);
+	 function onWindowResize() {
+	     myCanvas.width = window.innerWidth;
+	     myCanvas.height = window.innerHeight;
+	     camera.aspect = myCanvas.width / myCanvas.height;
+	     camera.updateProjectionMatrix();
+	     renderer.setSize(myCanvas.width, myCanvas.height);
+	 }
+
+	 
+	</script>
+
+    </body>
+</html>
